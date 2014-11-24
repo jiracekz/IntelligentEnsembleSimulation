@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry including="**/*.java" kind="src" output="target/classes" path="src">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/cz.cuni.mff.d3s.jdeeco.core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/cz.cuni.mff.d3s.jdeeco.simulation"/>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_25 x86"/>
+	<classpathentry kind="lib" path="C:/Users/Jebi/.m2/repository/org/eclipse/emf/org.eclipse.emf.ecore/2.9.0-v20130528-0742/org.eclipse.emf.ecore-2.9.0-v20130528-0742.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.eclipse.emf"/>
+			<attribute name="maven.artifactId" value="org.eclipse.emf.ecore"/>
+			<attribute name="maven.version" value="2.9.0-v20130528-0742"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Jebi/.m2/repository/org/eclipse/emf/org.eclipse.emf.common/2.9.0-v20130528-0742/org.eclipse.emf.common-2.9.0-v20130528-0742.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.eclipse.emf"/>
+			<attribute name="maven.artifactId" value="org.eclipse.emf.common"/>
+			<attribute name="maven.version" value="2.9.0-v20130528-0742"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>
