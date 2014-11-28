@@ -48,7 +48,7 @@ public class SimpleSimulationLauncher {
 		System.out.println("Run the simulation");
 		//Run the simulation
 		simulation.run();
-		System.out.println("Simulation Finished");
+		System.out.println("Simulation Finished.");
 	}
 	
 
