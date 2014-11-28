@@ -1,5 +1,8 @@
 package cz.cuni.mff.d3s.demo;
 
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EObject;
+
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessor;
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessorException;
 import cz.cuni.mff.d3s.deeco.knowledge.CloningKnowledgeManagerFactory;
@@ -28,18 +31,28 @@ public class SimpleSimulationLauncher {
 		builder = new SimulationRuntimeBuilder();
 		
 		RuntimeMetadata model = RuntimeMetadataFactoryExt.eINSTANCE
-				.createRuntimeMetadata();
+				.createRuntimeMetadata();		
+		
+		
 		processor = new AnnotationProcessor(
 				RuntimeMetadataFactoryExt.eINSTANCE, model, new CloningKnowledgeManagerFactory());
 		
-		TestComponent component = new TestComponent(1, 1001, 101);
-		TestComponent component2 = new TestComponent(2, 1001, 102);
-		TestComponent component3 = new TestComponent(3, 1002, 103);
-		processor.process(component);
-		processor.process(component2);
-		processor.process(component3);
+//		TestComponent component = new TestComponent(1, 1001, 101);
+//		TestComponent component2 = new TestComponent(2, 1001, 102);
+//		TestComponent component3 = new TestComponent(3, 1002, 103);
+//		processor.process(component);
+//		processor.process(component2);
+//		processor.process(component3);	
+//		
+//		processor.process(TestEnsemble.class);
 		
-		processor.process(TestEnsemble.class);
+		for (int i = 0; i < CoordinationEnsemble.SoldierCount; i++) {
+			Soldier s = new Soldier(i);
+			processor.process(s);			
+		}
+		
+		processor.process(SquadEnsemble.class);
+		processor.process(CoordinationEnsemble.class);
 		
 		DirectSimulationHost host = simulation.getHost("Host");
 		RuntimeFramework runtime = builder.build(host, simulation, null, model, new AlwaysRebroadcastingKnowledgeDataManager(model.getEnsembleDefinitions(), null), new CloningKnowledgeManagerFactory());

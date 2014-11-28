@@ -14,21 +14,25 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_25 x86"/>
-	<classpathentry kind="lib" path="C:/Users/Jebi/.m2/repository/org/eclipse/emf/org.eclipse.emf.ecore/2.9.0-v20130528-0742/org.eclipse.emf.ecore-2.9.0-v20130528-0742.jar">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
-			<attribute name="maven.groupId" value="org.eclipse.emf"/>
-			<attribute name="maven.artifactId" value="org.eclipse.emf.ecore"/>
-			<attribute name="maven.version" value="2.9.0-v20130528-0742"/>
-			<attribute name="maven.scope" value="compile"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Jebi/.m2/repository/org/eclipse/emf/org.eclipse.emf.common/2.9.0-v20130528-0742/org.eclipse.emf.common-2.9.0-v20130528-0742.jar">
+	<classpathentry kind="lib" path="C:/Users/Buckey/.m2/repository/org/eclipse/emf/org.eclipse.emf.common/2.9.0-v20130528-0742/org.eclipse.emf.common-2.9.0-v20130528-0742.jar">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 			<attribute name="maven.groupId" value="org.eclipse.emf"/>
 			<attribute name="maven.artifactId" value="org.eclipse.emf.common"/>
+			<attribute name="maven.version" value="2.9.0-v20130528-0742"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Buckey/.m2/repository/org/eclipse/emf/org.eclipse.emf.ecore/2.9.0-v20130528-0742/org.eclipse.emf.ecore-2.9.0-v20130528-0742.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.eclipse.emf"/>
+			<attribute name="maven.artifactId" value="org.eclipse.emf.ecore"/>
 			<attribute name="maven.version" value="2.9.0-v20130528-0742"/>
 			<attribute name="maven.scope" value="compile"/>
 		</attributes>
