@@ -33,7 +33,6 @@ public class SimpleSimulationLauncher {
 		RuntimeMetadata model = RuntimeMetadataFactoryExt.eINSTANCE
 				.createRuntimeMetadata();		
 		
-		
 		processor = new AnnotationProcessor(
 				RuntimeMetadataFactoryExt.eINSTANCE, model, new CloningKnowledgeManagerFactory());
 		
