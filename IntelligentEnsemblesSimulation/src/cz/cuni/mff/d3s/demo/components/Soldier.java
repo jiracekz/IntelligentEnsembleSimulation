@@ -1,7 +1,6 @@
 package cz.cuni.mff.d3s.demo.components;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,12 +9,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import cz.cuni.mff.d3s.deeco.annotations.*;
+import cz.cuni.mff.d3s.deeco.annotations.Component;
+import cz.cuni.mff.d3s.deeco.annotations.In;
+import cz.cuni.mff.d3s.deeco.annotations.InOut;
+import cz.cuni.mff.d3s.deeco.annotations.Local;
+import cz.cuni.mff.d3s.deeco.annotations.Out;
+import cz.cuni.mff.d3s.deeco.annotations.PeriodicScheduling;
 import cz.cuni.mff.d3s.deeco.annotations.Process;
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;
 import cz.cuni.mff.d3s.demo.AuditData;
 import cz.cuni.mff.d3s.demo.SimpleSimulationLauncher;
-import cz.cuni.mff.d3s.demo.SimulationSnapshot;
+import cz.cuni.mff.d3s.demo.SimulationController;
 
 @Component
 public class Soldier {
@@ -49,9 +53,18 @@ public class Soldier {
 	
 	@Process
 	@PeriodicScheduling(period = 1000)
-	public static void calculateEnsembles(@In("id") String id, @In("everyone") Map<String, SoldierData> everyone,
+	public static void inferTeamAndRole(@In("id") String id, @In("everyone") Map<String, SoldierData> everyone,
 			@Out("role") ParamHolder<SoldierRole> role, @Out("ensembleId") ParamHolder<Integer> ensembleId, 
 			@InOut("auditIteration") ParamHolder<Integer> auditIteration) {
+		
+		HashSet<Integer> ensembleMembers = calculateEnsembles(id, everyone, role, ensembleId);
+		
+		audit(id, ensembleId.value, role.value, ensembleMembers, auditIteration.value);
+		auditIteration.value = auditIteration.value + 1;
+	}
+
+	public static HashSet<Integer> calculateEnsembles(String id, Map<String, SoldierData> everyone, 
+			ParamHolder<SoldierRole> role, ParamHolder<Integer> ensembleId) {
 		
 		List<Entry<String, SoldierData>> orderedSoldiers = new ArrayList<Entry<String, SoldierData>>(everyone.entrySet());
 		orderedSoldiers.sort(new Comparator<Entry<String, SoldierData>>() {
@@ -72,11 +85,14 @@ public class Soldier {
 		
 		HashSet<Integer> ensembleMembers = new HashSet<>();
 		for (int i = 0; i < SimpleSimulationLauncher.SquadSize; i++) {
-			int soldierId = Integer.parseInt(orderedSoldiers.get(ensembleId.value * SimpleSimulationLauncher.SquadSize + i).getKey());
+			int index = ensembleId.value * SimpleSimulationLauncher.SquadSize + i;
+			if (index >= orderedSoldiers.size())
+				break;
+			
+			int soldierId = Integer.parseInt(orderedSoldiers.get(index).getKey());
 			ensembleMembers.add(soldierId);
 		}
-		
-		
+				
 		if (offsetInSquad == 0) {
 			role.value = SoldierRole.Leader;
 		} else if (offsetInSquad % 2 == 1) {
@@ -85,8 +101,7 @@ public class Soldier {
 			role.value = SoldierRole.Medic;
 		}
 		
-		audit(id, ensembleId.value, role.value, ensembleMembers, auditIteration.value);
-		auditIteration.value = auditIteration.value + 1;
+		return ensembleMembers;
 	}
 	
 	protected static void audit(String id, Integer ensembleId, SoldierRole role, Set<Integer> ensembleMembers, 
@@ -94,7 +109,7 @@ public class Soldier {
 		AuditData auditData = new AuditData();
 		auditData.role = role;
 		auditData.componentsInEnsemble = ensembleMembers;
-		SimulationSnapshot.addSnapshot(Integer.parseInt(id), auditIteration, auditData);
+		SimulationController.addSnapshot(Integer.parseInt(id), auditIteration, auditData);
 	}
 	
 	

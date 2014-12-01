@@ -1,11 +1,7 @@
 package cz.cuni.mff.d3s.demo;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EObject;
 
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessor;
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessorException;
@@ -21,7 +17,6 @@ import cz.cuni.mff.d3s.deeco.simulation.SimulationRuntimeBuilder;
 import cz.cuni.mff.d3s.deeco.simulation.TimerTaskListener;
 import cz.cuni.mff.d3s.demo.components.Soldier;
 import cz.cuni.mff.d3s.demo.ensembles.ReplicationCoordinationEnsemble;
-import cz.cuni.mff.d3s.demo.ensembles.SquadEnsemble;
 
 public class SimpleSimulationLauncher {
 
@@ -34,6 +29,8 @@ public class SimpleSimulationLauncher {
 	private static SimulationRuntimeBuilder builder;
 	private static AnnotationProcessor processor;
 
+	public static Soldier[] soldiers;
+	
 	public static void run() throws AnnotationProcessorException {		
 		System.out.println("Preparing simulation");
 
@@ -49,23 +46,13 @@ public class SimpleSimulationLauncher {
 		processor = new AnnotationProcessor(
 				RuntimeMetadataFactoryExt.eINSTANCE, model, new CloningKnowledgeManagerFactory());
 		
-//		TestComponent component = new TestComponent(1, 1001, 101);
-//		TestComponent component2 = new TestComponent(2, 1001, 102);
-//		TestComponent component3 = new TestComponent(3, 1002, 103);
-//		processor.process(component);
-//		processor.process(component2);
-//		processor.process(component3);	
-//		
-//		processor.process(TestEnsemble.class);
-		
+		soldiers = new Soldier[SoldierCount];
 		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount; i++) {
-			Soldier s = new Soldier(i);
-			processor.process(s);			
+			soldiers[i] = new Soldier(i);
+			processor.process(soldiers[i]);			
 		}
 		
 		processor.process(ReplicationCoordinationEnsemble.class);
-		//processor.process(SquadEnsemble.class);
-		//processor.process(CentralizedCoordinationEnsemble.class);
 		
 		DirectSimulationHost host = simulation.getHost("Host");
 		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener());

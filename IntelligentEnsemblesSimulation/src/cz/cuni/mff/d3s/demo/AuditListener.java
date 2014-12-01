@@ -11,6 +11,7 @@ public class AuditListener implements TimerTaskListener {
 	public void at(long time, Object triger) {
 		// TODO Auto-generated method stub
 		System.out.println("Audit at " + time);
+		SimulationController.doAudit((int)(time / SimpleSimulationLauncher.SnapshotInterval));
 		
 		SimulationStepTask task = (SimulationStepTask) triger;
 		task.scheduleNextExecutionAfter(SimpleSimulationLauncher.SnapshotInterval);
@@ -18,7 +19,7 @@ public class AuditListener implements TimerTaskListener {
 
 	@Override
 	public TimerTask getInitialTask(SimulationScheduler scheduler) {
-		return new SimulationStepTask(scheduler, this, SimpleSimulationLauncher.SnapshotInterval + 1);
+		return new SimulationStepTask(scheduler, this, 2);
 	}
 
 }
