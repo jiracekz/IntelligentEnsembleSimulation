@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.demo;
+package cz.cuni.mff.d3s.demo.ensembles;
 
 import cz.cuni.mff.d3s.deeco.annotations.*;
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;

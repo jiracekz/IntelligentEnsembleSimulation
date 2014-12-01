@@ -1,5 +1,9 @@
 package cz.cuni.mff.d3s.demo;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 
@@ -14,8 +18,17 @@ import cz.cuni.mff.d3s.deeco.simulation.DirectSimulationHost;
 import cz.cuni.mff.d3s.deeco.simulation.JDEECoSimulation;
 import cz.cuni.mff.d3s.deeco.simulation.NetworkKnowledgeDataHandler;
 import cz.cuni.mff.d3s.deeco.simulation.SimulationRuntimeBuilder;
+import cz.cuni.mff.d3s.deeco.simulation.TimerTaskListener;
+import cz.cuni.mff.d3s.demo.components.Soldier;
+import cz.cuni.mff.d3s.demo.ensembles.ReplicationCoordinationEnsemble;
+import cz.cuni.mff.d3s.demo.ensembles.SquadEnsemble;
 
 public class SimpleSimulationLauncher {
+
+	public static int SimulationLength = 60000;
+	public static int SnapshotInterval = 1000;
+	public static int SoldierCount = 6;
+	public static int SquadSize = 3;
 
 	private static JDEECoSimulation simulation;
 	private static SimulationRuntimeBuilder builder;
@@ -26,7 +39,7 @@ public class SimpleSimulationLauncher {
 
 		// no delay when transferring knowledge
 		NetworkKnowledgeDataHandler networkHandler = new DirectKnowledgeDataHandler();
-		simulation = new JDEECoSimulation(0, 60000, networkHandler);
+		simulation = new JDEECoSimulation(0, SimulationLength, networkHandler);
 
 		builder = new SimulationRuntimeBuilder();
 		
@@ -45,16 +58,20 @@ public class SimpleSimulationLauncher {
 //		
 //		processor.process(TestEnsemble.class);
 		
-		for (int i = 0; i < CoordinationEnsemble.SoldierCount; i++) {
+		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount; i++) {
 			Soldier s = new Soldier(i);
 			processor.process(s);			
 		}
 		
-		processor.process(SquadEnsemble.class);
-		processor.process(CoordinationEnsemble.class);
+		processor.process(ReplicationCoordinationEnsemble.class);
+		//processor.process(SquadEnsemble.class);
+		//processor.process(CentralizedCoordinationEnsemble.class);
 		
 		DirectSimulationHost host = simulation.getHost("Host");
-		RuntimeFramework runtime = builder.build(host, simulation, null, model, new AlwaysRebroadcastingKnowledgeDataManager(model.getEnsembleDefinitions(), null), new CloningKnowledgeManagerFactory());
+		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener());
+		RuntimeFramework runtime = builder.build(host, simulation, listeners, model, 
+				new AlwaysRebroadcastingKnowledgeDataManager(model.getEnsembleDefinitions(), null), 
+				new CloningKnowledgeManagerFactory());
 		runtime.start();
 
 		System.out.println("Run the simulation");
@@ -62,6 +79,7 @@ public class SimpleSimulationLauncher {
 		simulation.run();
 		System.out.println("Simulation Finished.");
 	}
+
 	
 
 }
