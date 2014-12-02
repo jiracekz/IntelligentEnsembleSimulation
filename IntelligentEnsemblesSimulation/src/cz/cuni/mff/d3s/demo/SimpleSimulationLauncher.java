@@ -47,11 +47,14 @@ public class SimpleSimulationLauncher {
 				RuntimeMetadataFactoryExt.eINSTANCE, model, new CloningKnowledgeManagerFactory());
 		
 		soldiers = new Soldier[SoldierCount];
-		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount; i++) {
-			soldiers[i] = new Soldier(i);
+		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount /*- 1*/; i++) {
+			soldiers[i] = new Soldier(i, true);
 			processor.process(soldiers[i]);			
 		}
-		
+		/*
+		soldiers[6] = new Soldier(6, false);
+		processor.process(soldiers[6]);
+		*/
 		processor.process(ReplicationCoordinationEnsemble.class);
 		
 		DirectSimulationHost host = simulation.getHost("Host");

@@ -12,7 +12,7 @@ import cz.cuni.mff.d3s.deeco.task.ParamHolder;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
 
 @Ensemble
-@PeriodicScheduling(period = 1000)
+@PeriodicScheduling(period = 1000, offset = 500)
 public class ReplicationCoordinationEnsemble {
 
 	@Membership
@@ -27,7 +27,11 @@ public class ReplicationCoordinationEnsemble {
 	@In("coord.id") String coordId,
 	@In("member.id") String memberId,
 	@In("coord.soldierData") SoldierData coordinatorData,
-	@InOut("member.everyone") ParamHolder<Map<String, SoldierData>> memberList) {
+	@InOut("member.everyone") ParamHolder<Map<String, SoldierData>> memberList,
+	@In("coord.isOnline") Boolean coordIsOnline, @In("member.isOnline") Boolean memberIsOnline ) {
+		
+		if (!coordIsOnline || !memberIsOnline) return;
+		
 		coordinatorData.timestamp = 0; // TODO
 		memberList.value.put(coordId, coordinatorData);
 	}	

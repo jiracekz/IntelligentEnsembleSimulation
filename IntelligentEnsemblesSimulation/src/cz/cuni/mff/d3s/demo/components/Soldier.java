@@ -37,7 +37,9 @@ public class Soldier {
 	@Local
 	public Integer auditIteration;
 	
-	public Soldier(Integer id) {
+	public Boolean isOnline;
+	
+	public Soldier(Integer id, boolean isOnline) {
 		this.id = id.toString();
 		this.role = SoldierRole.Unassigned;
 		this.ensembleId = -1;
@@ -47,6 +49,7 @@ public class Soldier {
 		this.everyone.put(this.id, soldierData);
 		
 		this.auditIteration = 0;
+		this.isOnline = isOnline;
 		
 		System.out.println("Created a soldier with id = " + this.id + "; knowledge = " + this.soldierData.knowledge);
 	}
@@ -55,7 +58,9 @@ public class Soldier {
 	@PeriodicScheduling(period = 1000)
 	public static void inferTeamAndRole(@In("id") String id, @In("everyone") Map<String, SoldierData> everyone,
 			@Out("role") ParamHolder<SoldierRole> role, @Out("ensembleId") ParamHolder<Integer> ensembleId, 
-			@InOut("auditIteration") ParamHolder<Integer> auditIteration) {
+			@InOut("auditIteration") ParamHolder<Integer> auditIteration, @In("isOnline") Boolean isOnline) {
+		
+		if (!isOnline) return;
 		
 		HashSet<Integer> ensembleMembers = calculateEnsembles(id, everyone, role, ensembleId);
 		
@@ -115,8 +120,11 @@ public class Soldier {
 	
 	@Process
 	@PeriodicScheduling(period = 1000)
-	public static void performDuties(@In("id") String id, @In("role") SoldierRole role, @In("ensembleId") Integer ensembleId)
-	{			
+	public static void performDuties(@In("id") String id, @In("role") SoldierRole role,
+			@In("ensembleId") Integer ensembleId, @In("isOnline") Boolean isOnline) {
+		
+		if (!isOnline) return;
+		
 		switch (role) {
 			case Leader:
 				lead(id, ensembleId);
