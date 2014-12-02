@@ -17,7 +17,9 @@ import cz.cuni.mff.d3s.deeco.annotations.Out;
 import cz.cuni.mff.d3s.deeco.annotations.PeriodicScheduling;
 import cz.cuni.mff.d3s.deeco.annotations.Process;
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;
+import cz.cuni.mff.d3s.deeco.task.ProcessContext;
 import cz.cuni.mff.d3s.demo.AuditData;
+import cz.cuni.mff.d3s.demo.ComponentUptimeDecider;
 import cz.cuni.mff.d3s.demo.SimpleSimulationLauncher;
 import cz.cuni.mff.d3s.demo.SimulationController;
 
@@ -35,11 +37,14 @@ public class Soldier {
 	public Map<String, SoldierData> everyone;
 	
 	@Local
-	public Integer auditIteration;
+	public Integer auditIteration;	
 	
 	public Boolean isOnline;
 	
-	public Soldier(Integer id, boolean isOnline) {
+	@Local
+	public ComponentUptimeDecider decider;
+	
+	public Soldier(Integer id, boolean isOnline, ComponentUptimeDecider decider) {
 		this.id = id.toString();
 		this.role = SoldierRole.Unassigned;
 		this.ensembleId = -1;
@@ -50,6 +55,8 @@ public class Soldier {
 		
 		this.auditIteration = 0;
 		this.isOnline = isOnline;
+		
+		this.decider = decider;
 		
 		System.out.println("Created a soldier with id = " + this.id + "; knowledge = " + this.soldierData.knowledge);
 	}
@@ -65,7 +72,7 @@ public class Soldier {
 		HashSet<Integer> ensembleMembers = calculateEnsembles(id, everyone, role, ensembleId);
 		
 		audit(id, ensembleId.value, role.value, ensembleMembers, auditIteration.value);
-		auditIteration.value = auditIteration.value + 1;
+		auditIteration.value = auditIteration.value + 1;		
 	}
 
 	public static HashSet<Integer> calculateEnsembles(String id, Map<String, SoldierData> everyone, 
@@ -115,6 +122,18 @@ public class Soldier {
 		auditData.role = role;
 		auditData.componentsInEnsemble = ensembleMembers;
 		SimulationController.addSnapshot(Integer.parseInt(id), auditIteration, auditData);
+	}
+	
+	@Process
+	@PeriodicScheduling(period = 1000, offset = 700)
+	public static void updateState(@In("id") String id, @In("decider") ComponentUptimeDecider decider, @InOut("isOnline") ParamHolder<Boolean> isOnline) {
+		
+		boolean newState = decider.shouldBeOnline(Integer.parseInt(id), ProcessContext.getTimeProvider().getCurrentMilliseconds());
+		
+		if(newState != isOnline.value)
+			System.out.println("Random event! Soldier " + id + (newState ? " has recovered!" : " has been downed!"));
+		
+		
 	}
 	
 	

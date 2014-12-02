@@ -1,7 +1,11 @@
 package cz.cuni.mff.d3s.demo;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EObject;
 
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessor;
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessorException;
@@ -29,7 +33,7 @@ public class SimpleSimulationLauncher {
 	private static SimulationRuntimeBuilder builder;
 	private static AnnotationProcessor processor;
 
-	public static Soldier[] soldiers;
+	//public static Soldier[] soldiers;
 	
 	public static void run() throws AnnotationProcessorException {		
 		System.out.println("Preparing simulation");
@@ -46,9 +50,13 @@ public class SimpleSimulationLauncher {
 		processor = new AnnotationProcessor(
 				RuntimeMetadataFactoryExt.eINSTANCE, model, new CloningKnowledgeManagerFactory());
 		
-		soldiers = new Soldier[SoldierCount];
+		
+		ComponentUptimeDecider decider = new ComponentUptimeDecider();
+		
+		
+		Soldier[] soldiers = new Soldier[SoldierCount];
 		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount /*- 1*/; i++) {
-			soldiers[i] = new Soldier(i, true);
+			soldiers[i] = new Soldier(i, true, decider);
 			processor.process(soldiers[i]);			
 		}
 		/*
@@ -58,7 +66,7 @@ public class SimpleSimulationLauncher {
 		processor.process(ReplicationCoordinationEnsemble.class);
 		
 		DirectSimulationHost host = simulation.getHost("Host");
-		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener());
+		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener());		
 		RuntimeFramework runtime = builder.build(host, simulation, listeners, model, 
 				new AlwaysRebroadcastingKnowledgeDataManager(model.getEnsembleDefinitions(), null), 
 				new CloningKnowledgeManagerFactory());
@@ -68,6 +76,14 @@ public class SimpleSimulationLauncher {
 		//Run the simulation
 		simulation.run();
 		System.out.println("Simulation Finished.");
+		
+	
+		try {
+			SimulationController.SaveResults("results.csv");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	
