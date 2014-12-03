@@ -26,12 +26,11 @@ public class SimpleSimulationLauncher {
 
 	public static int SimulationLength = 60000;
 	public static int SnapshotInterval = 1000;
-	public static int SoldierCount = 6;
+	public static int SoldierCount = 2;
 	public static int SquadSize = 3;
 
 	private static JDEECoSimulation simulation;
 	private static SimulationRuntimeBuilder builder;
-	private static AnnotationProcessor processor;
 
 	//public static Soldier[] soldiers;
 	
@@ -44,12 +43,13 @@ public class SimpleSimulationLauncher {
 
 		builder = new SimulationRuntimeBuilder();
 		
-		RuntimeMetadata model = RuntimeMetadataFactoryExt.eINSTANCE
-				.createRuntimeMetadata();		
-		
-		processor = new AnnotationProcessor(
-				RuntimeMetadataFactoryExt.eINSTANCE, model, new CloningKnowledgeManagerFactory());
-		
+		RuntimeMetadata[] models = new RuntimeMetadata[SoldierCount];
+		AnnotationProcessor[] processors = new AnnotationProcessor[SoldierCount];
+		for (int i = 0; i < SoldierCount; i++) {
+			models[i] = RuntimeMetadataFactoryExt.eINSTANCE.createRuntimeMetadata();
+			processors[i] = new AnnotationProcessor(
+					RuntimeMetadataFactoryExt.eINSTANCE, models[i], new CloningKnowledgeManagerFactory());
+		}
 		
 		ComponentUptimeDecider decider = new ComponentUptimeDecider();
 		
@@ -57,20 +57,26 @@ public class SimpleSimulationLauncher {
 		Soldier[] soldiers = new Soldier[SoldierCount];
 		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount /*- 1*/; i++) {
 			soldiers[i] = new Soldier(i, true, decider);
-			processor.process(soldiers[i]);			
+			processors[i].process(soldiers[i]);			
 		}
 		/*
 		soldiers[6] = new Soldier(6, false);
 		processor.process(soldiers[6]);
 		*/
-		processor.process(ReplicationCoordinationEnsemble.class);
+		for (int i = 0; i < SoldierCount; i++) {
+			processors[i].process(ReplicationCoordinationEnsemble.class);
+		}
 		
-		DirectSimulationHost host = simulation.getHost("Host");
-		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener());		
-		RuntimeFramework runtime = builder.build(host, simulation, listeners, model, 
-				new AlwaysRebroadcastingKnowledgeDataManager(model.getEnsembleDefinitions(), null), 
-				new CloningKnowledgeManagerFactory());
-		runtime.start();
+		DirectSimulationHost[] hosts = new DirectSimulationHost[SoldierCount];
+		RuntimeFramework runtimes[] = new RuntimeFramework[SoldierCount];
+		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener());
+		for (int i = 0; i < SoldierCount; i++) {
+			hosts[i] = simulation.getHost("Host" + i);
+			runtimes[i] = builder.build(hosts[i], simulation, i == 0 ? listeners : null, models[i], 
+					new AlwaysRebroadcastingKnowledgeDataManager(models[i].getEnsembleDefinitions(), null), 
+					new CloningKnowledgeManagerFactory());
+			runtimes[i].start();
+		}
 
 		System.out.println("Run the simulation");
 		//Run the simulation

@@ -139,7 +139,7 @@ public class Soldier {
 	
 	
 	@Process
-	@PeriodicScheduling(period = 1000)
+	@PeriodicScheduling(period = 1000, offset = 1)
 	public static void performDuties(@In("id") String id, @In("role") SoldierRole role,
 			@In("ensembleId") Integer ensembleId, @In("isOnline") Boolean isOnline) {
 		
