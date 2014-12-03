@@ -17,38 +17,41 @@ public class SimulationController {
 	private static String dataSeparator = "\t";
 	
 	private static AuditData[][] snapshots;
+	private static boolean[][] soldiersOnline;
+	private static SoldierData[][] soldierSnapshots;
 	private static Float[][] snapshotCorrectness;
 	
 	static {
 		snapshots = new AuditData[snapshotCount][SimpleSimulationLauncher.SoldierCount];
+		soldiersOnline = new boolean[snapshotCount][SimpleSimulationLauncher.SoldierCount];
+		soldierSnapshots = new SoldierData[snapshotCount][SimpleSimulationLauncher.SoldierCount];
 		snapshotCorrectness = new Float[snapshotCount][SimpleSimulationLauncher.SoldierCount];
 	}
 	
-	public static void addSnapshot(int soldierId, int iteration, AuditData auditData) {
+	public static void addSnapshot(int soldierId, int iteration, AuditData auditData, SoldierData soldierData) {
+		soldiersOnline[iteration][soldierId] = true;
 		snapshots[iteration][soldierId] = auditData;
+		soldierSnapshots[iteration][soldierId] = soldierData;
 	}
 	
 	public static void doAudit(int iteration) {
 		
 		Map<String, SoldierData> currentSoldierData = new HashMap<>();
 		
-		// TODO Tohle pracuje jen s iniciálním stavem, pøepsat, ale jak?
-		//      Buï to musí nìjak dodat komponenta sama (AuditData?), nebo se musíme vhackovat dovnitø knowledge manageru 
-		for (Soldier soldier : SimpleSimulationLauncher.soldiers) {
-			if (soldier.isOnline) {
-				currentSoldierData.put(soldier.id, soldier.soldierData);
+		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount; i++) {
+			if (soldiersOnline[iteration][i]) {
+				currentSoldierData.put(i + "", soldierSnapshots[iteration][i]);
 			}
 		}
 		
 		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount; i++) {									
 			AuditData correctAuditData = new AuditData();
-			//TODO Tohle pracuje jen s iniciálním stavem, pøepsat, ale jak?
-			Soldier soldier = SimpleSimulationLauncher.soldiers[i];
-			if (!soldier.isOnline) continue;
+
+			if (!soldiersOnline[iteration][i]) continue;
 			
 			ParamHolder<SoldierRole> roleHolder = new ParamHolder<>();
 			ParamHolder<Integer> ensembleIdHolder = new ParamHolder<>();
-			correctAuditData.componentsInEnsemble = Soldier.calculateEnsembles(soldier.id, 
+			correctAuditData.componentsInEnsemble = Soldier.calculateEnsembles(i + "", 
 					currentSoldierData, roleHolder, ensembleIdHolder);
 			correctAuditData.role = roleHolder.value;
 			

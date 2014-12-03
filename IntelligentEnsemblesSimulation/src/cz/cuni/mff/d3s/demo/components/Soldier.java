@@ -65,13 +65,14 @@ public class Soldier {
 	@PeriodicScheduling(period = 1000)
 	public static void inferTeamAndRole(@In("id") String id, @In("everyone") Map<String, SoldierData> everyone,
 			@Out("role") ParamHolder<SoldierRole> role, @Out("ensembleId") ParamHolder<Integer> ensembleId, 
-			@InOut("auditIteration") ParamHolder<Integer> auditIteration, @In("isOnline") Boolean isOnline) {
+			@InOut("auditIteration") ParamHolder<Integer> auditIteration, @In("isOnline") Boolean isOnline,
+			@In("soldierData") SoldierData soldierData) {
 		
 		if (!isOnline) return;
 		
 		HashSet<Integer> ensembleMembers = calculateEnsembles(id, everyone, role, ensembleId);
 		
-		audit(id, ensembleId.value, role.value, ensembleMembers, auditIteration.value);
+		audit(id, ensembleId.value, role.value, ensembleMembers, auditIteration.value, soldierData);
 		auditIteration.value = auditIteration.value + 1;		
 	}
 
@@ -117,11 +118,11 @@ public class Soldier {
 	}
 	
 	protected static void audit(String id, Integer ensembleId, SoldierRole role, Set<Integer> ensembleMembers, 
-			Integer auditIteration) {
+			Integer auditIteration, SoldierData soldierData) {
 		AuditData auditData = new AuditData();
 		auditData.role = role;
 		auditData.componentsInEnsemble = ensembleMembers;
-		SimulationController.addSnapshot(Integer.parseInt(id), auditIteration, auditData);
+		SimulationController.addSnapshot(Integer.parseInt(id), auditIteration, auditData, soldierData);
 	}
 	
 	@Process

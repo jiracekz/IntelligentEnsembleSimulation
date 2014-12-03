@@ -26,13 +26,13 @@ public class ComponentUptimeDecider {
 		return uptimeData[(int)(time / 1000)][id];
 	}
 	
-	public void generateUptimeData()
+	public void generateUptimeData(int nIterations)
 	{
 		if(generator.nextFloat() >= eventProbability) {
 			System.out.println("No random events this round.");
 		}
 		
-		uptimeData = new boolean[10][SimpleSimulationLauncher.SoldierCount];
+		uptimeData = new boolean[nIterations][SimpleSimulationLauncher.SoldierCount];
 		
 		for (int i = 0; i < uptimeData.length; i++) {
 			
