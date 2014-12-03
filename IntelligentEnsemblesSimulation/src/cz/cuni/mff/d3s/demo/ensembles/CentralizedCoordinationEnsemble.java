@@ -4,7 +4,7 @@ import java.util.Random;
 
 import cz.cuni.mff.d3s.deeco.annotations.*;
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;
-import cz.cuni.mff.d3s.demo.SimpleSimulationLauncher;
+import cz.cuni.mff.d3s.demo.SimulationConstants;
 
 @Ensemble
 @PeriodicScheduling(period = 10000)
@@ -20,7 +20,7 @@ public class CentralizedCoordinationEnsemble {
 	@Membership
 	public static boolean membership(@In("coord.myId") Integer cId,
 			@In("member.myId") Integer mId) {		
-		return (cId == mId - 1 || (cId == SimpleSimulationLauncher.SoldierCount - 1 && mId == 0));
+		return (cId == mId - 1 || (cId == SimulationConstants.SoldierCount - 1 && mId == 0));
 	}
 	
 	@KnowledgeExchange

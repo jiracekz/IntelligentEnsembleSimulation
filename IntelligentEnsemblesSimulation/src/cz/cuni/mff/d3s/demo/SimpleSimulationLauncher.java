@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EObject;
-
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessor;
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessorException;
 import cz.cuni.mff.d3s.deeco.knowledge.CloningKnowledgeManagerFactory;
@@ -16,18 +13,13 @@ import cz.cuni.mff.d3s.deeco.runtime.RuntimeFramework;
 import cz.cuni.mff.d3s.deeco.simulation.DirectKnowledgeDataHandler;
 import cz.cuni.mff.d3s.deeco.simulation.DirectSimulationHost;
 import cz.cuni.mff.d3s.deeco.simulation.JDEECoSimulation;
-import cz.cuni.mff.d3s.deeco.simulation.NetworkKnowledgeDataHandler;
+import cz.cuni.mff.d3s.deeco.simulation.NetworkDataHandler;
 import cz.cuni.mff.d3s.deeco.simulation.SimulationRuntimeBuilder;
 import cz.cuni.mff.d3s.deeco.simulation.TimerTaskListener;
 import cz.cuni.mff.d3s.demo.components.Soldier;
 import cz.cuni.mff.d3s.demo.ensembles.ReplicationCoordinationEnsemble;
 
 public class SimpleSimulationLauncher {
-
-	public static int SimulationLength = 60000;
-	public static int SnapshotInterval = 1000;
-	public static int SoldierCount = 6;
-	public static int SquadSize = 3;
 
 	private static JDEECoSimulation simulation;
 	private static SimulationRuntimeBuilder builder;
@@ -39,8 +31,8 @@ public class SimpleSimulationLauncher {
 		System.out.println("Preparing simulation");
 
 		// no delay when transferring knowledge
-		NetworkKnowledgeDataHandler networkHandler = new DirectKnowledgeDataHandler();
-		simulation = new JDEECoSimulation(0, SimulationLength, networkHandler);
+		NetworkDataHandler networkHandler = new DirectKnowledgeDataHandler();
+		simulation = new JDEECoSimulation(0, SimulationConstants.SimulationLength, networkHandler);
 
 		builder = new SimulationRuntimeBuilder();
 		
@@ -52,10 +44,10 @@ public class SimpleSimulationLauncher {
 		
 		
 		ComponentUptimeDecider decider = new ComponentUptimeDecider();
+		decider.generateUptimeData(SimulationConstants.IterationCount);		
 		
-		
-		Soldier[] soldiers = new Soldier[SoldierCount];
-		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount /*- 1*/; i++) {
+		Soldier[] soldiers = new Soldier[SimulationConstants.SoldierCount];
+		for (int i = 0; i < SimulationConstants.SoldierCount /*- 1*/; i++) {
 			soldiers[i] = new Soldier(i, true, decider);
 			processor.process(soldiers[i]);			
 		}

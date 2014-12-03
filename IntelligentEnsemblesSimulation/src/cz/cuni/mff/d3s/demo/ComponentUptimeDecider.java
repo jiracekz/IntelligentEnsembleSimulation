@@ -9,8 +9,6 @@ import cz.cuni.mff.d3s.deeco.simulation.task.TimerTask;
 import cz.cuni.mff.d3s.demo.components.Soldier;
 
 public class ComponentUptimeDecider {
-	private static float eventProbability = 0.6f;
-	private static int eventPossibilityInterval = 1000;
 	private static Random generator;
 	
 	private boolean[][] uptimeData;
@@ -26,18 +24,30 @@ public class ComponentUptimeDecider {
 		return uptimeData[(int)(time / 1000)][id];
 	}
 	
-	public void generateUptimeData(int nIterations)
+	public void generateUptimeData(int iterationCount)
 	{
-		if(generator.nextFloat() >= eventProbability) {
-			System.out.println("No random events this round.");
-		}
+		uptimeData = new boolean[iterationCount][SimulationConstants.SoldierCount];		
 		
-		uptimeData = new boolean[nIterations][SimpleSimulationLauncher.SoldierCount];
-		
-		for (int i = 0; i < uptimeData.length; i++) {
+		for (int iteration = 0; iteration < uptimeData.length; iteration++) {
+			for(int componentId = 0; componentId < SimulationConstants.SoldierCount; componentId++) {
+				// Default for first iteration: All components online
+				boolean componentState = true;
+				
+				// Copy state from the previous iteration
+				if(iteration != 0)
+					componentState = uptimeData[iteration - 1][componentId];
+				
+				uptimeData[iteration][componentId] = componentState;					
+			}
+				
 			
-		}
-		
-		Integer concernedComponentId = generator.nextInt(SimpleSimulationLauncher.SoldierCount);
+			// Check for random event this round
+			if(generator.nextFloat() >= SimulationConstants.UptimeEventProbability)
+				continue;	
+			
+			// Select the random component that fails or recovers and flip the state			
+			Integer concernedComponentId = generator.nextInt(SimulationConstants.SoldierCount);
+			uptimeData[iteration][concernedComponentId] = !uptimeData[iteration][concernedComponentId]; 
+		}		
 	}
 }

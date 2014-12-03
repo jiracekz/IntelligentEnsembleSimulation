@@ -9,6 +9,7 @@ import cz.cuni.mff.d3s.deeco.annotations.KnowledgeExchange;
 import cz.cuni.mff.d3s.deeco.annotations.Membership;
 import cz.cuni.mff.d3s.deeco.annotations.PeriodicScheduling;
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;
+import cz.cuni.mff.d3s.deeco.task.ProcessContext;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
 
 @Ensemble
@@ -32,7 +33,7 @@ public class ReplicationCoordinationEnsemble {
 		
 		if (!coordIsOnline || !memberIsOnline) return;
 		
-		coordinatorData.timestamp = 0; // TODO
+		coordinatorData.timestamp = ProcessContext.getTimeProvider().getCurrentMilliseconds();
 		memberList.value.put(coordId, coordinatorData);
 	}	
 }

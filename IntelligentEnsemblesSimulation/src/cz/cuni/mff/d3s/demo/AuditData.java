@@ -7,4 +7,9 @@ import cz.cuni.mff.d3s.demo.components.SoldierRole;
 public class AuditData {
 	public Set<Integer> componentsInEnsemble;
 	public SoldierRole role;
+	
+	@Override
+	public String toString() {
+		return "{role: " + role + ", ensemble: " + componentsInEnsemble + "}";	
+	}
 }

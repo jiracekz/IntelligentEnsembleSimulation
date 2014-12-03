@@ -20,7 +20,7 @@ import cz.cuni.mff.d3s.deeco.task.ParamHolder;
 import cz.cuni.mff.d3s.deeco.task.ProcessContext;
 import cz.cuni.mff.d3s.demo.AuditData;
 import cz.cuni.mff.d3s.demo.ComponentUptimeDecider;
-import cz.cuni.mff.d3s.demo.SimpleSimulationLauncher;
+import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.SimulationController;
 
 @Component
@@ -63,17 +63,38 @@ public class Soldier {
 	
 	@Process
 	@PeriodicScheduling(period = 1000)
-	public static void inferTeamAndRole(@In("id") String id, @In("everyone") Map<String, SoldierData> everyone,
+	public static void inferTeamAndRole(@In("id") String id, @InOut("everyone") ParamHolder<Map<String, SoldierData>> everyone,
 			@Out("role") ParamHolder<SoldierRole> role, @Out("ensembleId") ParamHolder<Integer> ensembleId, 
 			@InOut("auditIteration") ParamHolder<Integer> auditIteration, @In("isOnline") Boolean isOnline,
 			@In("soldierData") SoldierData soldierData) {
 		
-		if (!isOnline) return;
+		if (!isOnline) {
+			auditIteration.value = auditIteration.value + 1;
+			return;
+		}
 		
-		HashSet<Integer> ensembleMembers = calculateEnsembles(id, everyone, role, ensembleId);
+		Map<String, SoldierData> newEveryone = new HashMap<>();
+		newEveryone.put(id, soldierData);
+		
+		// Filter out the old knowledge - could be done in a better way perhaps?
+		for(Entry<String, SoldierData> entry : everyone.value.entrySet())
+		{
+			if(entry.getKey().equals(id))
+				continue;
+			
+			long timeDiff = Math.abs(entry.getValue().timestamp - ProcessContext.getTimeProvider().getCurrentMilliseconds());
+			
+			if(timeDiff <= SimulationConstants.KnowledgeTimeout)
+			{
+				newEveryone.put(entry.getKey(), entry.getValue());
+			}				
+		}		
+		
+		HashSet<Integer> ensembleMembers = calculateEnsembles(id, newEveryone, role, ensembleId);
 		
 		audit(id, ensembleId.value, role.value, ensembleMembers, auditIteration.value, soldierData);
-		auditIteration.value = auditIteration.value + 1;		
+		auditIteration.value = auditIteration.value + 1;
+		everyone.value = newEveryone;
 	}
 
 	public static HashSet<Integer> calculateEnsembles(String id, Map<String, SoldierData> everyone, 
@@ -91,14 +112,14 @@ public class Soldier {
 		int offsetInSquad = -1;
 		for (int i = 0; i < orderedSoldiers.size(); i++) {
 			if (id.equals(orderedSoldiers.get(i).getKey())) {
-				ensembleId.value = i / SimpleSimulationLauncher.SquadSize;
-				offsetInSquad = i % SimpleSimulationLauncher.SquadSize;
+				ensembleId.value = i / SimulationConstants.SquadSize;
+				offsetInSquad = i % SimulationConstants.SquadSize;
 			}
 		}
 		
 		HashSet<Integer> ensembleMembers = new HashSet<>();
-		for (int i = 0; i < SimpleSimulationLauncher.SquadSize; i++) {
-			int index = ensembleId.value * SimpleSimulationLauncher.SquadSize + i;
+		for (int i = 0; i < SimulationConstants.SquadSize; i++) {
+			int index = ensembleId.value * SimulationConstants.SquadSize + i;
 			if (index >= orderedSoldiers.size())
 				break;
 			
@@ -126,24 +147,26 @@ public class Soldier {
 	}
 	
 	@Process
-	@PeriodicScheduling(period = 1000, offset = 700)
+	@PeriodicScheduling(period = 1000, offset = 100)
 	public static void updateState(@In("id") String id, @In("decider") ComponentUptimeDecider decider, @InOut("isOnline") ParamHolder<Boolean> isOnline) {
 		
 		boolean newState = decider.shouldBeOnline(Integer.parseInt(id), ProcessContext.getTimeProvider().getCurrentMilliseconds());
 		
 		if(newState != isOnline.value)
-			System.out.println("Random event! Soldier " + id + (newState ? " has recovered!" : " has been downed!"));
-		
-		
+			System.out.println("Random event! Soldier " + id + (newState ? " has recovered!" : " has been downed!"));		
+		isOnline.value = newState;		
 	}
 	
 	
 	@Process
-	@PeriodicScheduling(period = 1000)
+	@PeriodicScheduling(period = 1000, offset = 1)
 	public static void performDuties(@In("id") String id, @In("role") SoldierRole role,
 			@In("ensembleId") Integer ensembleId, @In("isOnline") Boolean isOnline) {
 		
-		if (!isOnline) return;
+		if (!isOnline) {
+			System.out.println("Soldier " + id + " is down.");
+			return;
+		}
 		
 		switch (role) {
 			case Leader:

@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class SoldierData {
 
-	public int timestamp;
+	public long timestamp;
 	
 	public int knowledge;
 	
@@ -25,6 +25,11 @@ public class SoldierData {
 	public boolean isAlive() {
 		// TODO
 		return true;
+	}
+	
+	@Override
+	public String toString() {
+		return "{k: " + knowledge + ", ts: " + timestamp + "}";
 	}
 	
 }

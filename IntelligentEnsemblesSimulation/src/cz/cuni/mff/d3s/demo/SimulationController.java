@@ -13,7 +13,6 @@ import cz.cuni.mff.d3s.demo.components.SoldierRole;
 
 public class SimulationController {
 	
-	private static int snapshotCount = SimpleSimulationLauncher.SimulationLength / SimpleSimulationLauncher.SnapshotInterval;
 	private static String dataSeparator = "\t";
 	
 	private static AuditData[][] snapshots;
@@ -22,10 +21,10 @@ public class SimulationController {
 	private static Float[][] snapshotCorrectness;
 	
 	static {
-		snapshots = new AuditData[snapshotCount][SimpleSimulationLauncher.SoldierCount];
-		soldiersOnline = new boolean[snapshotCount][SimpleSimulationLauncher.SoldierCount];
-		soldierSnapshots = new SoldierData[snapshotCount][SimpleSimulationLauncher.SoldierCount];
-		snapshotCorrectness = new Float[snapshotCount][SimpleSimulationLauncher.SoldierCount];
+		snapshots = new AuditData[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
+		soldiersOnline = new boolean[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
+		soldierSnapshots = new SoldierData[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
+		snapshotCorrectness = new Float[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
 	}
 	
 	public static void addSnapshot(int soldierId, int iteration, AuditData auditData, SoldierData soldierData) {
@@ -38,13 +37,13 @@ public class SimulationController {
 		
 		Map<String, SoldierData> currentSoldierData = new HashMap<>();
 		
-		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount; i++) {
+		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {
 			if (soldiersOnline[iteration][i]) {
 				currentSoldierData.put(i + "", soldierSnapshots[iteration][i]);
 			}
 		}
 		
-		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount; i++) {									
+		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {									
 			AuditData correctAuditData = new AuditData();
 
 			if (!soldiersOnline[iteration][i]) continue;
@@ -62,12 +61,14 @@ public class SimulationController {
 		}
 			
 		System.out.printf("Audit result: %.2f %%\n", getOverallAuditValue(iteration) * 100);
+		System.out.println("-------------");
+		int x = 0;
 	}
 	
 	private static float getOverallAuditValue(int iteration) {
 		float sum = 0;
 		int n = 0;
-		for (int i = 0; i < SimpleSimulationLauncher.SoldierCount; i++) {
+		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {
 			if (snapshotCorrectness[iteration][i] != null) {
 				sum += snapshotCorrectness[iteration][i];
 				n++;
@@ -90,8 +91,8 @@ public class SimulationController {
 		FileWriter fileWriter = new FileWriter(outputFile);
 		BufferedWriter writer = new BufferedWriter(fileWriter);
 		
-		for(int iteration = 0; iteration < snapshotCount; ++iteration) {
-			for(int componentId = 0; componentId < SimpleSimulationLauncher.SoldierCount; ++componentId) {
+		for(int iteration = 0; iteration < SimulationConstants.IterationCount; ++iteration) {
+			for(int componentId = 0; componentId < SimulationConstants.SoldierCount; ++componentId) {
 				Float correctness = snapshotCorrectness[iteration][componentId]; 
 				
 				if(correctness != null)
@@ -99,7 +100,7 @@ public class SimulationController {
 				else
 					writer.write("X");
 				
-				if(componentId != SimpleSimulationLauncher.SoldierCount)
+				if(componentId != SimulationConstants.SoldierCount)
 					writer.write(", ");
 			}
 			
