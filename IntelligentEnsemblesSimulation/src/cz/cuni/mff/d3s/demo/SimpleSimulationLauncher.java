@@ -10,6 +10,7 @@ import cz.cuni.mff.d3s.deeco.knowledge.CloningKnowledgeManagerFactory;
 import cz.cuni.mff.d3s.deeco.model.runtime.api.RuntimeMetadata;
 import cz.cuni.mff.d3s.deeco.model.runtime.custom.RuntimeMetadataFactoryExt;
 import cz.cuni.mff.d3s.deeco.runtime.RuntimeFramework;
+import cz.cuni.mff.d3s.deeco.simulation.DelayedKnowledgeDataHandler;
 import cz.cuni.mff.d3s.deeco.simulation.DirectKnowledgeDataHandler;
 import cz.cuni.mff.d3s.deeco.simulation.DirectSimulationHost;
 import cz.cuni.mff.d3s.deeco.simulation.JDEECoSimulation;
@@ -30,7 +31,8 @@ public class SimpleSimulationLauncher {
 		System.out.println("Preparing simulation");
 
 		// no delay when transferring knowledge
-		NetworkDataHandler networkHandler = new DirectKnowledgeDataHandler();
+		NetworkDataHandler networkHandler = new DelayedKnowledgeDataHandler(274);
+		//NetworkDataHandler networkHandler = new DirectKnowledgeHandler();
 		simulation = new JDEECoSimulation(0, SimulationConstants.SimulationLength, networkHandler);
 
 		builder = new SimulationRuntimeBuilder();
@@ -61,10 +63,11 @@ public class SimpleSimulationLauncher {
 		
 		DirectSimulationHost[] hosts = new DirectSimulationHost[SimulationConstants.SoldierCount];
 		RuntimeFramework runtimes[] = new RuntimeFramework[SimulationConstants.SoldierCount];
-		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener());
+		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener(), (TimerTaskListener) networkHandler);
+		List<TimerTaskListener> listeners0 = Arrays.asList((TimerTaskListener) networkHandler);
 		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {
 			hosts[i] = simulation.getHost("Host" + i);
-			runtimes[i] = builder.build(hosts[i], simulation, i == 0 ? listeners : null, models[i], 
+			runtimes[i] = builder.build(hosts[i], simulation, i == 0 ? listeners : listeners0, models[i], 
 					new AlwaysRebroadcastingKnowledgeDataManager(models[i].getEnsembleDefinitions(), null), 
 					new CloningKnowledgeManagerFactory());
 			runtimes[i].start();
