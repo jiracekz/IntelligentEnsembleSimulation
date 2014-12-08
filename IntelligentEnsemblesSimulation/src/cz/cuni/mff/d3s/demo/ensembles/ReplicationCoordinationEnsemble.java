@@ -9,7 +9,6 @@ import cz.cuni.mff.d3s.deeco.annotations.KnowledgeExchange;
 import cz.cuni.mff.d3s.deeco.annotations.Membership;
 import cz.cuni.mff.d3s.deeco.annotations.PeriodicScheduling;
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;
-import cz.cuni.mff.d3s.deeco.task.ProcessContext;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
 
 @Ensemble

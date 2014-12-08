@@ -18,6 +18,8 @@ import cz.cuni.mff.d3s.deeco.simulation.NetworkDataHandler;
 import cz.cuni.mff.d3s.deeco.simulation.SimulationRuntimeBuilder;
 import cz.cuni.mff.d3s.deeco.simulation.TimerTaskListener;
 import cz.cuni.mff.d3s.demo.components.Soldier;
+import cz.cuni.mff.d3s.demo.components.SoldierDirectionsCenter;
+import cz.cuni.mff.d3s.demo.ensembles.CentralizedCoordinationEnsemble;
 import cz.cuni.mff.d3s.demo.ensembles.ReplicationCoordinationEnsemble;
 
 public class SimpleSimulationLauncher {
@@ -53,11 +55,15 @@ public class SimpleSimulationLauncher {
 			decider.setInitStateFor(i, soldiers[i].isOnline);
 			processors[i].process(soldiers[i]);			
 		}
-
+		
 		decider.generateUptimeData();
 		
 		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {
-			processors[i].process(ReplicationCoordinationEnsemble.class);
+			if (SimulationConstants.IsCentralized) {
+				processors[i].process(CentralizedCoordinationEnsemble.class);
+			} else {
+				processors[i].process(ReplicationCoordinationEnsemble.class);
+			}
 		}
 		
 		DirectSimulationHost[] hosts = new DirectSimulationHost[SimulationConstants.SoldierCount];
@@ -70,6 +76,21 @@ public class SimpleSimulationLauncher {
 					new AlwaysRebroadcastingKnowledgeDataManager(models[i].getEnsembleDefinitions(), null), 
 					new CloningKnowledgeManagerFactory());
 			runtimes[i].start();
+		}
+		
+		if (SimulationConstants.IsCentralized) {
+			// add directions center
+			RuntimeMetadata model = RuntimeMetadataFactoryExt.eINSTANCE.createRuntimeMetadata();
+			AnnotationProcessor processor = new AnnotationProcessor(
+					RuntimeMetadataFactoryExt.eINSTANCE, model, new CloningKnowledgeManagerFactory());
+			processor.process(new SoldierDirectionsCenter(SimulationConstants.SoldierCount));
+			processor.process(CentralizedCoordinationEnsemble.class);
+			
+			DirectSimulationHost host = simulation.getHost("Coordinator");
+			RuntimeFramework runtime = builder.build(host, simulation, listeners0, model,
+					new AlwaysRebroadcastingKnowledgeDataManager(model.getEnsembleDefinitions(),  null),
+					new CloningKnowledgeManagerFactory());
+			runtime.start();
 		}
 
 		System.out.println("Run the simulation");

@@ -19,7 +19,7 @@ public class AuditListener implements TimerTaskListener {
 
 	@Override
 	public TimerTask getInitialTask(SimulationScheduler scheduler) {
-		return new SimulationStepTask(scheduler, this, 2);
+		return new SimulationStepTask(scheduler, this, 3);
 	}
 
 }

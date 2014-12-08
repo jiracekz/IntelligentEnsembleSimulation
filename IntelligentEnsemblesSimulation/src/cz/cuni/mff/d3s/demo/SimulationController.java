@@ -3,8 +3,6 @@ package cz.cuni.mff.d3s.demo;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;
 import cz.cuni.mff.d3s.demo.components.Soldier;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
@@ -21,10 +19,10 @@ public class SimulationController {
 	private static Float[][] snapshotCorrectness;
 	
 	static {
-		snapshots = new AuditData[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
-		soldiersOnline = new boolean[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
-		soldierSnapshots = new SoldierData[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
-		snapshotCorrectness = new Float[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
+		snapshots = new AuditData[SimulationConstants.IterationCount + 1][SimulationConstants.SoldierCount];
+		soldiersOnline = new boolean[SimulationConstants.IterationCount + 1][SimulationConstants.SoldierCount];
+		soldierSnapshots = new SoldierData[SimulationConstants.IterationCount + 1][SimulationConstants.SoldierCount];
+		snapshotCorrectness = new Float[SimulationConstants.IterationCount + 1][SimulationConstants.SoldierCount];
 	}
 	
 	public static void addSnapshot(int soldierId, int iteration, AuditData auditData, SoldierData soldierData) {
