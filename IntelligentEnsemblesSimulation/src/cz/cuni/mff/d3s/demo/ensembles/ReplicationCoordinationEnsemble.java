@@ -33,7 +33,6 @@ public class ReplicationCoordinationEnsemble {
 		
 		if (!coordIsOnline || !memberIsOnline) return;
 		
-		coordinatorData.timestamp = ProcessContext.getTimeProvider().getCurrentMilliseconds();
-		memberList.value.put(coordId, coordinatorData);
+		memberList.value.put(coordId, coordinatorData.clone());
 	}	
 }

@@ -2,6 +2,8 @@ package cz.cuni.mff.d3s.demo.components;
 
 import java.util.Random;
 
+import cz.cuni.mff.d3s.demo.SimulationConstants;
+
 public class SoldierData {
 
 	public long timestamp;
@@ -22,9 +24,15 @@ public class SoldierData {
 		this (generator.nextInt(10000000));
 	}
 	
-	public boolean isAlive() {
-		// TODO
-		return true;
+	public SoldierData clone() {
+		SoldierData copy = new SoldierData(knowledge);
+		copy.timestamp = timestamp;
+		return copy;
+	}
+	
+	public boolean isAlive(long currentTime) {
+		long timeDiff = Math.abs(timestamp - currentTime);
+		return (timeDiff <= SimulationConstants.KnowledgeTimeout);
 	}
 	
 	@Override

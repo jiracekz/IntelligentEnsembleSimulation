@@ -17,6 +17,14 @@ public class ComponentUptimeDecider {
 		generator = new Random(42);		
 	}
 	
+	public ComponentUptimeDecider(int iterationCount) {
+		uptimeData = new boolean[iterationCount][SimulationConstants.SoldierCount];
+	}
+	
+	public void setInitStateFor(int componentId, boolean initState) {
+		uptimeData[0][componentId] = initState;
+	}
+	
 	public boolean shouldBeOnline(int id, long time) {
 		if(uptimeData == null)
 			return true;
@@ -24,30 +32,62 @@ public class ComponentUptimeDecider {
 		return uptimeData[(int)(time / 1000)][id];
 	}
 	
-	public void generateUptimeData(int iterationCount)
-	{
-		uptimeData = new boolean[iterationCount][SimulationConstants.SoldierCount];		
-		
-		for (int iteration = 0; iteration < uptimeData.length; iteration++) {
+	public void generateUptimeData()
+	{		
+		for (int iteration = 1; iteration < uptimeData.length; iteration++) {
 			for(int componentId = 0; componentId < SimulationConstants.SoldierCount; componentId++) {
-				// Default for first iteration: All components online
-				boolean componentState = true;
-				
 				// Copy state from the previous iteration
-				if(iteration != 0)
-					componentState = uptimeData[iteration - 1][componentId];
-				
-				uptimeData[iteration][componentId] = componentState;					
+				uptimeData[iteration][componentId] = uptimeData[iteration - 1][componentId];					
 			}
 				
 			
 			// Check for random event this round
-			if(generator.nextFloat() >= SimulationConstants.UptimeEventProbability)
-				continue;	
+			int soldierDownIndex = -1;
+			int soldierUpIndex = -1;
+			if(generator.nextFloat() <= SimulationConstants.SoldierDownProbability) {
+				soldierDownIndex = selectRandomWithState(iteration, true);
+			}
 			
-			// Select the random component that fails or recovers and flip the state			
-			Integer concernedComponentId = generator.nextInt(SimulationConstants.SoldierCount);
-			uptimeData[iteration][concernedComponentId] = !uptimeData[iteration][concernedComponentId]; 
+			if (generator.nextFloat() <= SimulationConstants.SoldierUpProbability) {
+				soldierUpIndex = selectRandomWithState(iteration, false);
+			}
+			
+			if (soldierDownIndex >= 0) {
+				assert uptimeData[iteration][soldierDownIndex];
+				uptimeData[iteration][soldierDownIndex] = false;
+			}
+			
+			if (soldierUpIndex >= 0) {
+				assert !uptimeData[iteration][soldierUpIndex];
+				uptimeData[iteration][soldierUpIndex] = true;
+			}
 		}		
+	}
+	
+	private int selectRandomWithState(int iteration, boolean onlineState) {
+		int num = 0;
+		for (int i = 0; i < uptimeData[iteration].length; i++) {
+			if (uptimeData[iteration][i] == onlineState) {
+				num++;
+			}
+		}
+		
+		if (num == 0) {
+			return -1;
+		}
+		
+		int randomIndex = generator.nextInt(num);
+		int resultIndex = 0;
+		while (true) {
+			if (uptimeData[iteration][resultIndex] == onlineState) {
+				if (randomIndex == 0) {
+					return resultIndex;
+				} else {
+					randomIndex--;
+				}
+			}
+			
+			resultIndex++;
+		}
 	}
 }

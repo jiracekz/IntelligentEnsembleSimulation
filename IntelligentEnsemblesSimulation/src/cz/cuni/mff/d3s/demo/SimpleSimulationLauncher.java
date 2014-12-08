@@ -31,7 +31,7 @@ public class SimpleSimulationLauncher {
 		System.out.println("Preparing simulation");
 
 		// no delay when transferring knowledge
-		NetworkDataHandler networkHandler = new DelayedKnowledgeDataHandler(274);
+		NetworkDataHandler networkHandler = new DelayedKnowledgeDataHandler(1000);
 		//NetworkDataHandler networkHandler = new DirectKnowledgeHandler();
 		simulation = new JDEECoSimulation(0, SimulationConstants.SimulationLength, networkHandler);
 
@@ -45,18 +45,17 @@ public class SimpleSimulationLauncher {
 					RuntimeMetadataFactoryExt.eINSTANCE, models[i], new CloningKnowledgeManagerFactory());
 		}
 		
-		ComponentUptimeDecider decider = new ComponentUptimeDecider();
-		decider.generateUptimeData(SimulationConstants.IterationCount);		
+		ComponentUptimeDecider decider = new ComponentUptimeDecider(SimulationConstants.IterationCount);		
 		
 		Soldier[] soldiers = new Soldier[SimulationConstants.SoldierCount];
 		for (int i = 0; i < SimulationConstants.SoldierCount /*- 1*/; i++) {
 			soldiers[i] = new Soldier(i, true, decider);
+			decider.setInitStateFor(i, soldiers[i].isOnline);
 			processors[i].process(soldiers[i]);			
 		}
-		/*
-		soldiers[6] = new Soldier(6, false);
-		processor.process(soldiers[6]);
-		*/
+
+		decider.generateUptimeData();
+		
 		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {
 			processors[i].process(ReplicationCoordinationEnsemble.class);
 		}

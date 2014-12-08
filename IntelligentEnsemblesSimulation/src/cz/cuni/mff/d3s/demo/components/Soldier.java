@@ -66,7 +66,7 @@ public class Soldier {
 	public static void inferTeamAndRole(@In("id") String id, @InOut("everyone") ParamHolder<Map<String, SoldierData>> everyone,
 			@Out("role") ParamHolder<SoldierRole> role, @Out("ensembleId") ParamHolder<Integer> ensembleId, 
 			@InOut("auditIteration") ParamHolder<Integer> auditIteration, @In("isOnline") Boolean isOnline,
-			@In("soldierData") SoldierData soldierData) {
+			@InOut("soldierData") ParamHolder<SoldierData> soldierData) {
 		
 		if (!isOnline) {
 			auditIteration.value = auditIteration.value + 1;
@@ -74,7 +74,7 @@ public class Soldier {
 		}
 		
 		Map<String, SoldierData> newEveryone = new HashMap<>();
-		newEveryone.put(id, soldierData);
+		newEveryone.put(id, soldierData.value);
 		
 		// Filter out the old knowledge - could be done in a better way perhaps?
 		for(Entry<String, SoldierData> entry : everyone.value.entrySet())
@@ -82,9 +82,7 @@ public class Soldier {
 			if(entry.getKey().equals(id))
 				continue;
 			
-			long timeDiff = Math.abs(entry.getValue().timestamp - ProcessContext.getTimeProvider().getCurrentMilliseconds());
-			
-			if(timeDiff <= SimulationConstants.KnowledgeTimeout)
+			if(entry.getValue().isAlive(ProcessContext.getTimeProvider().getCurrentMilliseconds()))
 			{
 				newEveryone.put(entry.getKey(), entry.getValue());
 			}				
@@ -92,9 +90,11 @@ public class Soldier {
 		
 		HashSet<Integer> ensembleMembers = calculateEnsembles(id, newEveryone, role, ensembleId);
 		
-		audit(id, ensembleId.value, role.value, ensembleMembers, auditIteration.value, soldierData);
+		audit(id, ensembleId.value, role.value, ensembleMembers, auditIteration.value, soldierData.value);
 		auditIteration.value = auditIteration.value + 1;
 		everyone.value = newEveryone;
+		
+		soldierData.value.timestamp = ProcessContext.getTimeProvider().getCurrentMilliseconds();
 	}
 
 	public static HashSet<Integer> calculateEnsembles(String id, Map<String, SoldierData> everyone, 
