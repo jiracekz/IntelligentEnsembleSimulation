@@ -17,12 +17,14 @@ public class SimulationController {
 	private static boolean[][] soldiersOnline;
 	private static SoldierData[][] soldierSnapshots;
 	private static Float[][] snapshotCorrectness;
+	private static float[] auditResults;
 	
 	static {
-		snapshots = new AuditData[SimulationConstants.IterationCount + 1][SimulationConstants.SoldierCount];
-		soldiersOnline = new boolean[SimulationConstants.IterationCount + 1][SimulationConstants.SoldierCount];
-		soldierSnapshots = new SoldierData[SimulationConstants.IterationCount + 1][SimulationConstants.SoldierCount];
-		snapshotCorrectness = new Float[SimulationConstants.IterationCount + 1][SimulationConstants.SoldierCount];
+		snapshots = new AuditData[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
+		soldiersOnline = new boolean[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
+		soldierSnapshots = new SoldierData[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
+		snapshotCorrectness = new Float[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
+		auditResults = new float[SimulationConstants.IterationCount];
 	}
 	
 	public static void addSnapshot(int soldierId, int iteration, AuditData auditData, SoldierData soldierData) {
@@ -58,9 +60,15 @@ public class SimulationController {
 			
 		}
 			
+		float auditResult = getOverallAuditValue(iteration);
 		System.out.printf("Audit result: %.2f %%\n", getOverallAuditValue(iteration) * 100);
 		System.out.println("-------------");
-		int x = 0;
+		
+		if (auditResult == Float.NaN) {
+			auditResult = 1;
+		}
+		
+		auditResults[iteration] = auditResult;
 	}
 	
 	private static float getOverallAuditValue(int iteration) {
@@ -81,6 +89,16 @@ public class SimulationController {
 		return snapshot.role == correct.role && snapshot.componentsInEnsemble.equals(correct.componentsInEnsemble)
 				? 1f : 0f;
 		
+	}
+	
+	public static void PrintOverallResult() {
+		float totalResult = 0f;
+		for (float result : auditResults) {
+			totalResult += result;
+		}
+		
+		totalResult /= auditResults.length;
+		System.out.printf("Average audit result: %.2f %%\n", totalResult * 100);
 	}
 	
 	public static void SaveResults(String filename) throws IOException

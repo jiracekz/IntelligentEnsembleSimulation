@@ -33,7 +33,7 @@ public class SimpleSimulationLauncher {
 		System.out.println("Preparing simulation");
 
 		// no delay when transferring knowledge
-		NetworkDataHandler networkHandler = new DelayedKnowledgeDataHandler(1000);
+		NetworkDataHandler networkHandler = new RandomDelayedKnowledgeDataHandler(0, 4000);
 		//NetworkDataHandler networkHandler = new DirectKnowledgeHandler();
 		simulation = new JDEECoSimulation(0, SimulationConstants.SimulationLength, networkHandler);
 
@@ -97,7 +97,7 @@ public class SimpleSimulationLauncher {
 		//Run the simulation
 		simulation.run();
 		System.out.println("Simulation Finished.");
-		
+		SimulationController.PrintOverallResult();
 	
 		try {
 			SimulationController.SaveResults("results.csv");
