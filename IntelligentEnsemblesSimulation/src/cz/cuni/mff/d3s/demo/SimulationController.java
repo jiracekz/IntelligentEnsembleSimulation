@@ -10,21 +10,17 @@ import cz.cuni.mff.d3s.demo.components.SoldierRole;
 
 
 public class SimulationController {
-	
+	//TODO: REWRITE
 	private static String dataSeparator = "\t";
 	
 	private static AuditData[][] snapshots;
 	private static boolean[][] soldiersOnline;
 	private static SoldierData[][] soldierSnapshots;
-	private static Float[][] snapshotCorrectness;
-	private static float[] auditResults;
 	
 	static {
 		snapshots = new AuditData[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
 		soldiersOnline = new boolean[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
 		soldierSnapshots = new SoldierData[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
-		snapshotCorrectness = new Float[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
-		auditResults = new float[SimulationConstants.IterationCount];
 	}
 	
 	public static void addSnapshot(int soldierId, int iteration, AuditData auditData, SoldierData soldierData) {

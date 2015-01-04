@@ -22,14 +22,10 @@ public class CentralizedCoordinationEnsemble {
 	public static void assignEnsembles(
 			@InOut("coord.allSoldiers") ParamHolder<HashMap<String, SoldierData>> allSoldiers,
 			@In("coord.ensembleIds") int[] ensembleIds,
-			@In("coord.roles") SoldierRole[] roles,
-			@In("coord.ensembleContents") HashSet<?>[] ensembleContents,
 			@In("member.id") String memberId,
 			@In("member.soldierData") SoldierData memberData,
 			@In("member.isOnline") Boolean memberIsOnline,
-			@InOut("member.role") ParamHolder<SoldierRole> memberRole,
-			@InOut("member.ensembleId") ParamHolder<Integer> memberEnsembleId,
-			@InOut("member.ensembleMembers") ParamHolder<HashSet<Integer>> ensembleMembers) {
+			@InOut("member.ensembleId") ParamHolder<Integer> memberEnsembleId) {
 		
 		if (!memberIsOnline) return;
 		
@@ -38,8 +34,6 @@ public class CentralizedCoordinationEnsemble {
 		
 		// coordinator sets the member its settings
 		int id = Integer.parseInt(memberId);
-		memberRole.value = roles[id];
 		memberEnsembleId.value = ensembleIds[id];
-		ensembleMembers.value = (HashSet<Integer>) ensembleContents[id];
 	}	
 }
