@@ -17,6 +17,8 @@ import cz.cuni.mff.d3s.deeco.task.ProcessContext;
 @Component
 public class SoldierDirectionsCenter {
 
+	public String id;
+	
 	public HashMap<String, SoldierData> allSoldiers;
 	
 	// indexed by soldier ID
@@ -25,6 +27,8 @@ public class SoldierDirectionsCenter {
 	public HashSet<?>[] ensembleContents;
 	
 	public SoldierDirectionsCenter(int componentCount) {
+		id = "<central>";
+		
 		allSoldiers = new HashMap<String, SoldierData>();
 		ensembleIds = new int[componentCount];
 		roles = new SoldierRole[componentCount];

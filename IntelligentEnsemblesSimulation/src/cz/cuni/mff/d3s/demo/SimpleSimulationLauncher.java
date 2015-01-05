@@ -10,8 +10,6 @@ import cz.cuni.mff.d3s.deeco.knowledge.CloningKnowledgeManagerFactory;
 import cz.cuni.mff.d3s.deeco.model.runtime.api.RuntimeMetadata;
 import cz.cuni.mff.d3s.deeco.model.runtime.custom.RuntimeMetadataFactoryExt;
 import cz.cuni.mff.d3s.deeco.runtime.RuntimeFramework;
-import cz.cuni.mff.d3s.deeco.simulation.DelayedKnowledgeDataHandler;
-import cz.cuni.mff.d3s.deeco.simulation.DirectKnowledgeDataHandler;
 import cz.cuni.mff.d3s.deeco.simulation.DirectSimulationHost;
 import cz.cuni.mff.d3s.deeco.simulation.JDEECoSimulation;
 import cz.cuni.mff.d3s.deeco.simulation.NetworkDataHandler;
@@ -47,7 +45,7 @@ public class SimpleSimulationLauncher {
 					RuntimeMetadataFactoryExt.eINSTANCE, models[i], new CloningKnowledgeManagerFactory());
 		}
 		
-		ComponentUptimeDecider decider = new ComponentUptimeDecider(SimulationConstants.IterationCount);		
+		ComponentUptimeDecider decider = new ComponentUptimeDecider(new RandomUptimeDecider(), SimulationConstants.IterationCount);		
 		
 		Soldier[] soldiers = new Soldier[SimulationConstants.SoldierCount];
 		for (int i = 0; i < SimulationConstants.SoldierCount /*- 1*/; i++) {

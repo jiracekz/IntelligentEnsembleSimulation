@@ -14,7 +14,7 @@ public class CentralizedCoordinationEnsemble {
 	@Membership
 	public static boolean membership(
 			@In("coord.allSoldiers") HashMap<String, SoldierData> allSoldiers,
-			@In("member.id") String memberId) {		
+			@In("member.role") SoldierRole role) {		
 		return allSoldiers != null;
 	}
 	

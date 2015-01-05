@@ -64,7 +64,7 @@ public class SimulationController {
 		System.out.printf("Audit result: %.2f %%\n", getOverallAuditValue(iteration) * 100);
 		System.out.println("-------------");
 		
-		if (auditResult == Float.NaN) {
+		if (Float.isNaN(auditResult)) {
 			auditResult = 1;
 		}
 		
