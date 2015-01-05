@@ -2,14 +2,14 @@ package cz.cuni.mff.d3s.demo.components;
 
 import java.util.Random;
 
+import cz.cuni.mff.d3s.demo.Coordinates;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
 
 public class SoldierData {
 
 	public long timestamp;
 	
-	public int x;
-	public int y;
+	public Coordinates coords;
 	
 	private static Random generator;
 	
@@ -17,17 +17,20 @@ public class SoldierData {
 		generator = new Random(42);
 	}
 	
-	public SoldierData(int x, int y) {
-		this.x = x;
-		this.y = y;
+	public SoldierData(double x, double y) {
+		this.coords = new Coordinates(x, y);
+	}
+	
+	public SoldierData(Coordinates coords) {
+		this.coords = coords;
 	}
 	
 	public SoldierData() {
-		this (generator.nextInt(1000), generator.nextInt(1000));
+		this (generator.nextDouble() * SimulationConstants.FieldWidth, generator.nextDouble() * SimulationConstants.FieldHeight);
 	}
 	
 	public SoldierData clone() {
-		SoldierData copy = new SoldierData(x, y);
+		SoldierData copy = new SoldierData(coords);
 		copy.timestamp = timestamp;
 		return copy;
 	}
@@ -39,6 +42,6 @@ public class SoldierData {
 	
 	@Override
 	public String toString() {
-		return "{x: " + x + " y: " + y + ", ts: " + timestamp + "}";
+		return "{coords: " + coords + ", ts: " + timestamp + "}";
 	}	
 }

@@ -24,18 +24,18 @@ public class SoldierDirectionsCenter {
 	
 	// indexed by soldier ID
 	public int[] ensembleIds;
-	public SoldierRole[] roles;
+	//public SoldierRole[] roles;
 	
 	public SoldierDirectionsCenter(int componentCount) {
 		id = "<central>";
 		
 		allSoldiers = new HashMap<String, SoldierData>();
 		ensembleIds = new int[componentCount];
-		roles = new SoldierRole[componentCount];
+		//roles = new SoldierRole[componentCount];
 		
 		for (int i = 0; i < componentCount; i++) {
 			ensembleIds[i] = -1;
-			roles[i] = SoldierRole.Unassigned;
+			//roles[i] = SoldierRole.Unassigned;
 		}
 	}
 	
@@ -43,10 +43,8 @@ public class SoldierDirectionsCenter {
 	@PeriodicScheduling(period = 1000, offset = 900)
 	public static void CalculateEnsembles(
 			@In("allSoldiers") HashMap<String, SoldierData> allSoldiers,
-			@InOut("ensembleIds") ParamHolder<int[]> ensembleIds,
-			@InOut("roles") ParamHolder<SoldierRole[]> roles,
-			@InOut("ensembleContents") ParamHolder<HashSet<?>[]> ensembleContents) {
+			@InOut("ensembleIds") ParamHolder<int[]> ensembleIds) {
 		
-		//TODO	
+		ensembleIds.value = OverallEnsembleCalculator.calculateEnsembles(allSoldiers);
 	}	
 }

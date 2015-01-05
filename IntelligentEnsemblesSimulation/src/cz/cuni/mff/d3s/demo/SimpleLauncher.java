@@ -3,6 +3,7 @@ package cz.cuni.mff.d3s.demo;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessor;
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessorException;
@@ -10,6 +11,8 @@ import cz.cuni.mff.d3s.deeco.knowledge.CloningKnowledgeManagerFactory;
 import cz.cuni.mff.d3s.deeco.model.runtime.api.RuntimeMetadata;
 import cz.cuni.mff.d3s.deeco.model.runtime.custom.RuntimeMetadataFactoryExt;
 import cz.cuni.mff.d3s.deeco.runtime.RuntimeFramework;
+import cz.cuni.mff.d3s.deeco.simulation.DelayedKnowledgeDataHandler;
+import cz.cuni.mff.d3s.deeco.simulation.DirectKnowledgeDataHandler;
 import cz.cuni.mff.d3s.deeco.simulation.DirectSimulationHost;
 import cz.cuni.mff.d3s.deeco.simulation.JDEECoSimulation;
 import cz.cuni.mff.d3s.deeco.simulation.NetworkDataHandler;
@@ -29,12 +32,13 @@ public class SimpleLauncher {
 	
 	public static void main(String[] args) throws AnnotationProcessorException {
 		
+		Locale.setDefault(Locale.US);
+		
 		System.out.println("Preparing simulation");
 
 		// no delay when transferring knowledge
 		//NetworkDataHandler networkHandler = new DelayedKnowledgeDataHandler(1000);
 		NetworkDataHandler networkHandler = new RandomDelayedKnowledgeDataHandler(0, 4000);
-		//NetworkDataHandler networkHandler = new DirectKnowledgeHandler();
 		simulation = new JDEECoSimulation(0, SimulationConstants.SimulationLength, networkHandler);
 
 		builder = new SimulationRuntimeBuilder();
@@ -68,7 +72,7 @@ public class SimpleLauncher {
 		
 		DirectSimulationHost[] hosts = new DirectSimulationHost[SimulationConstants.SoldierCount];
 		RuntimeFramework runtimes[] = new RuntimeFramework[SimulationConstants.SoldierCount];
-		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener(), (TimerTaskListener) networkHandler);
+		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener(runtimes), (TimerTaskListener) networkHandler);
 		List<TimerTaskListener> listeners0 = Arrays.asList((TimerTaskListener) networkHandler);
 		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {
 			hosts[i] = simulation.getHost("Host" + i);
@@ -92,19 +96,11 @@ public class SimpleLauncher {
 					new CloningKnowledgeManagerFactory());
 			runtime.start();
 		}
-
+		
 		System.out.println("Run the simulation");
 		//Run the simulation
 		simulation.run();
 		System.out.println("Simulation Finished.");
-		SimulationController.PrintOverallResult();
-	
-		try {
-			SimulationController.SaveResults("results.csv");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 	}
 

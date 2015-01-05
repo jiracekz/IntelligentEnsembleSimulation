@@ -9,8 +9,8 @@ public class BasicAssignmentCalculator implements SoldierAssignmentCalculator {
 	@Override
 	public int AssignEnsemble(String id, SoldierData soldierData,
 			Map<String, SoldierData> everyone) {
-		// TODO Auto-generated method stub
-		return 0;
+		int[] ensembles = OverallEnsembleCalculator.calculateEnsembles(everyone);
+		return ensembles[Integer.parseInt(id)];
 	}
 
 }

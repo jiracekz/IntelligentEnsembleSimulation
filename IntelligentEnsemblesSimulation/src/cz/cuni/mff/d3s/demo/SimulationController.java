@@ -1,124 +1,133 @@
 package cz.cuni.mff.d3s.demo;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import cz.cuni.mff.d3s.deeco.task.ParamHolder;
-import cz.cuni.mff.d3s.demo.components.Soldier;
+import java.util.Map.Entry;
+
+import cz.cuni.mff.d3s.deeco.knowledge.KnowledgeManager;
+import cz.cuni.mff.d3s.deeco.knowledge.KnowledgeNotFoundException;
+import cz.cuni.mff.d3s.deeco.knowledge.ReadOnlyKnowledgeManager;
+import cz.cuni.mff.d3s.deeco.knowledge.ValueSet;
+import cz.cuni.mff.d3s.deeco.model.runtime.api.KnowledgePath;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
-import cz.cuni.mff.d3s.demo.components.SoldierRole;
 
 
 public class SimulationController {
-	//TODO: REWRITE
-	private static String dataSeparator = "\t";
 	
-	private static AuditData[][] snapshots;
-	private static boolean[][] soldiersOnline;
-	private static SoldierData[][] soldierSnapshots;
+	private static String graphFileName = "results/audit%07d.txt";
 	
-	static {
-		snapshots = new AuditData[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
-		soldiersOnline = new boolean[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
-		soldierSnapshots = new SoldierData[SimulationConstants.IterationCount][SimulationConstants.SoldierCount];
-	}
-	
-	public static void addSnapshot(int soldierId, int iteration, AuditData auditData, SoldierData soldierData) {
-		soldiersOnline[iteration][soldierId] = true;
-		snapshots[iteration][soldierId] = auditData;
-		soldierSnapshots[iteration][soldierId] = soldierData;
-	}
-	
-	public static void doAudit(int iteration) {
+	public static void doAudit(long time, Map<String, KnowledgeManager> knowledgeManagers) {
 		
-		Map<String, SoldierData> currentSoldierData = new HashMap<>();
-		
-		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {
-			if (soldiersOnline[iteration][i]) {
-				currentSoldierData.put(i + "", soldierSnapshots[iteration][i]);
-			}
+		Map<String, AuditData> currentSoldierData;
+		try {
+			currentSoldierData = constructAuditData(knowledgeManagers);
+		} catch (KnowledgeNotFoundException e) {
+			System.out.println("Knowledge not found.");
+			return;
 		}
 		
-		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {									
-			AuditData correctAuditData = new AuditData();
+		printState(currentSoldierData);
+		try {
+			saveGraph(String.format(graphFileName, time), currentSoldierData);
+		} catch (IOException ioe) {
+			System.out.println("IO error while saving results.");
+		}
+		
+		// TODO write also some stats to another file
+	}
+	
+	// returns all components (even offline)
+	private static Map<String, AuditData> constructAuditData(Map<String, KnowledgeManager> knowledgeManagers) throws KnowledgeNotFoundException {
+		Map<String, AuditData> result = new HashMap<>();
 
-			if (!soldiersOnline[iteration][i]) continue;
-			
-			ParamHolder<SoldierRole> roleHolder = new ParamHolder<>();
-			ParamHolder<Integer> ensembleIdHolder = new ParamHolder<>();
-			correctAuditData.componentsInEnsemble = Soldier.calculateEnsembles(i + "", 
-					currentSoldierData, roleHolder, ensembleIdHolder);
-			correctAuditData.role = roleHolder.value;
-			
-			AuditData snapshotAuditData = snapshots[iteration][i];
-			
-			snapshotCorrectness[iteration][i] = compareAuditData(snapshotAuditData, correctAuditData);
-			
-		}
-			
-		float auditResult = getOverallAuditValue(iteration);
-		System.out.printf("Audit result: %.2f %%\n", getOverallAuditValue(iteration) * 100);
-		System.out.println("-------------");
-		
-		if (Float.isNaN(auditResult)) {
-			auditResult = 1;
-		}
-		
-		auditResults[iteration] = auditResult;
-	}
-	
-	private static float getOverallAuditValue(int iteration) {
-		float sum = 0;
-		int n = 0;
-		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {
-			if (snapshotCorrectness[iteration][i] != null) {
-				sum += snapshotCorrectness[iteration][i];
-				n++;
+		for (Entry<String, KnowledgeManager> managerEntry : knowledgeManagers.entrySet()) {
+			KnowledgeManager manager = managerEntry.getValue();
+			KnowledgePath soldierDataKnowledgePath = null;
+			KnowledgePath ensembleIdKnowledgePath = null;
+			for (KnowledgePath path : manager.getKnowledgePaths()) {
+				String pathStr = path.toString();
+				if (pathStr.equals("soldierData")) {
+					assert soldierDataKnowledgePath == null;
+					soldierDataKnowledgePath = path;
+				} else if (pathStr.equals("ensembleId")) {
+					assert ensembleIdKnowledgePath == null;
+					ensembleIdKnowledgePath = path;
+				}
 			}
+			assert soldierDataKnowledgePath != null;
+			assert ensembleIdKnowledgePath != null;
+			
+			ArrayList<KnowledgePath> knowledgePaths = new ArrayList<>();
+			knowledgePaths.add(soldierDataKnowledgePath);
+			knowledgePaths.add(ensembleIdKnowledgePath);
+			ValueSet valueSet = manager.get(knowledgePaths);
+			AuditData auditData = new AuditData();
+			auditData.soldierData = (SoldierData)valueSet.getValue(soldierDataKnowledgePath);
+			auditData.ensembleId = (Integer)valueSet.getValue(ensembleIdKnowledgePath);
+			result.put(managerEntry.getKey(), auditData);
 		}
 		
-		return sum / n;
+		return result;
 	}
 	
-	private static float compareAuditData(AuditData snapshot, AuditData correct) {
-		
-		return snapshot.role == correct.role && snapshot.componentsInEnsemble.equals(correct.componentsInEnsemble)
-				? 1f : 0f;
-		
-	}
-	
-	public static void PrintOverallResult() {
-		float totalResult = 0f;
-		for (float result : auditResults) {
-			totalResult += result;
+	private static void printState(Map<String, AuditData> soldierData) {
+		for (Entry<String, AuditData> soldierEntry : soldierData.entrySet()) {
+			System.out.printf("Soldier #%s: group = %d, coords = %s\n", soldierEntry.getKey(), soldierEntry.getValue().ensembleId,
+					soldierEntry.getValue().soldierData.coords.toString());
 		}
-		
-		totalResult /= auditResults.length;
-		System.out.printf("Average audit result: %.2f %%\n", totalResult * 100);
 	}
-	
-	public static void SaveResults(String filename) throws IOException
-	{				
+		
+	private static void saveGraph(String filename, Map<String, AuditData> soldierData) throws IOException	{				
 		File outputFile = new File(filename);
 		FileWriter fileWriter = new FileWriter(outputFile);
-		BufferedWriter writer = new BufferedWriter(fileWriter);
+		PrintWriter writer = new PrintWriter(fileWriter);
 		
-		for(int iteration = 0; iteration < SimulationConstants.IterationCount; ++iteration) {
-			for(int componentId = 0; componentId < SimulationConstants.SoldierCount; ++componentId) {
-				Float correctness = snapshotCorrectness[iteration][componentId]; 
-				
-				if(correctness != null)
-					writer.write(correctness.toString());
-				else
-					writer.write("X");
-				
-				if(componentId != SimulationConstants.SoldierCount)
-					writer.write(", ");
-			}
-			
-			writer.write("\n");			
+		writer.println("digraph {");
+
+		// the four corners
+		writer.println("a [pos=\"0,0\", style=invis]");
+		writer.printf ("b [pos=\"0,%f\", style=invis]\n", SimulationConstants.FieldHeight);
+		writer.printf ("c [pos=\"%f,0\", style=invis]\n", SimulationConstants.FieldWidth);
+		writer.printf ("b [pos=\"%f,%f\", style=invis]\n", SimulationConstants.FieldWidth, SimulationConstants.FieldHeight);
+		writer.println();
+		
+		// the target places
+		int i = 0;
+		for (Coordinates coords : SimulationConstants.TargetCoordinates) {
+			writer.printf("T%d [pos=%s, shape=box, color=%s]\n", i, formatPos(coords), getColor(i));
+			i++;
 		}
 		
+		writer.println();
+		
+		for (Entry<String, AuditData> soldierEntry : soldierData.entrySet()) {
+			AuditData soldier = soldierEntry.getValue();
+			writer.printf("S%s [pos=%s, color=%s, width=0.02, height=0.02]\n", soldierEntry.getKey(), 
+					formatPos(soldier.soldierData.coords), getColor(soldier.ensembleId));
+		}
+		
+		writer.println("}");
+				
 		writer.close();
+	}
+	
+	private static String formatPos(Coordinates coords) {
+		return String.format("\"%f,%f\"", coords.getX(), coords.getY());
+	}
+	
+	private static final String[] colors = new String[] { "red", "blue", "green", "purple" };
+	
+	private static String getColor(int groupId) {
+		if (groupId >= 0) {
+			return colors[groupId % colors.length];
+		} else {
+			return "grey";
+		}
 	}
 }

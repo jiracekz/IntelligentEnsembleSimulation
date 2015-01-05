@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import cz.cuni.mff.d3s.deeco.task.ProcessContext;
+import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
 
 public class OverallEnsembleCalculator {
@@ -14,7 +15,12 @@ public class OverallEnsembleCalculator {
 		everyone = filterOldKnowledge(everyone);		
 		
 		//TODO: Implement
-		return null;		
+		int[] result = new int[SimulationConstants.SoldierCount];
+		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {
+			result[i] = i % SimulationConstants.TargetCoordinates.length;
+		}
+		
+		return result;
 	}
 
 	public static Map<String, SoldierData> filterOldKnowledge(Map<String, SoldierData> everyone) {
