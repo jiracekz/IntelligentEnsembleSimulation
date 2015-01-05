@@ -19,11 +19,11 @@ import cz.cuni.mff.d3s.deeco.annotations.Process;
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;
 import cz.cuni.mff.d3s.deeco.task.ProcessContext;
 import cz.cuni.mff.d3s.demo.AuditData;
-import cz.cuni.mff.d3s.demo.ComponentUptimeDecider;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.SimulationController;
 import cz.cuni.mff.d3s.demo.assignment.BasicAssignmentCalculator;
 import cz.cuni.mff.d3s.demo.assignment.SoldierAssignmentCalculator;
+import cz.cuni.mff.d3s.uptime.ComponentUptimeDecider;
 
 @Component
 public class Soldier {

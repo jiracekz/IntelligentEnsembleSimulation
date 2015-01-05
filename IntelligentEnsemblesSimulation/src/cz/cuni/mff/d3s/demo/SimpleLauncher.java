@@ -19,6 +19,8 @@ import cz.cuni.mff.d3s.demo.components.Soldier;
 import cz.cuni.mff.d3s.demo.components.SoldierDirectionsCenter;
 import cz.cuni.mff.d3s.demo.ensembles.CentralizedCoordinationEnsemble;
 import cz.cuni.mff.d3s.demo.ensembles.ReplicationCoordinationEnsemble;
+import cz.cuni.mff.d3s.uptime.ComponentUptimeDecider;
+import cz.cuni.mff.d3s.uptime.RandomUptimeDecider;
 
 public class SimpleLauncher {
 

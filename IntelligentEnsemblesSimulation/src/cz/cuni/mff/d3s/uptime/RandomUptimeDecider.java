@@ -1,6 +1,8 @@
-package cz.cuni.mff.d3s.demo;
+package cz.cuni.mff.d3s.uptime;
 
 import java.util.Random;
+
+import cz.cuni.mff.d3s.demo.SimulationConstants;
 
 public class RandomUptimeDecider implements ComponentUptimeDeciderGenerator {
 	

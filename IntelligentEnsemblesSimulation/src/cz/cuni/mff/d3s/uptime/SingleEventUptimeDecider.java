@@ -1,4 +1,6 @@
-package cz.cuni.mff.d3s.demo;
+package cz.cuni.mff.d3s.uptime;
+
+import cz.cuni.mff.d3s.demo.SimulationConstants;
 
 public class SingleEventUptimeDecider implements
 		ComponentUptimeDeciderGenerator {
