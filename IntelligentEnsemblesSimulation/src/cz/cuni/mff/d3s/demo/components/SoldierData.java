@@ -8,7 +8,8 @@ public class SoldierData {
 
 	public long timestamp;
 	
-	public int knowledge;
+	public int x;
+	public int y;
 	
 	private static Random generator;
 	
@@ -16,16 +17,17 @@ public class SoldierData {
 		generator = new Random(42);
 	}
 	
-	public SoldierData(int knowledge) {
-		this.knowledge = knowledge;
+	public SoldierData(int x, int y) {
+		this.x = x;
+		this.y = y;
 	}
 	
 	public SoldierData() {
-		this (generator.nextInt(10000000));
+		this (generator.nextInt(1000), generator.nextInt(1000));
 	}
 	
 	public SoldierData clone() {
-		SoldierData copy = new SoldierData(knowledge);
+		SoldierData copy = new SoldierData(x, y);
 		copy.timestamp = timestamp;
 		return copy;
 	}
@@ -37,7 +39,6 @@ public class SoldierData {
 	
 	@Override
 	public String toString() {
-		return "{k: " + knowledge + ", ts: " + timestamp + "}";
-	}
-	
+		return "{x: " + x + " y: " + y + ", ts: " + timestamp + "}";
+	}	
 }

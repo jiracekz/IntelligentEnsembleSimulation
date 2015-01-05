@@ -11,4 +11,6 @@ public class SimulationConstants {
 	public static int SquadSize = 3;
 	public static float SoldierDownProbability = 0.2f;
 	public static float SoldierUpProbability = 0.2f;
+	
+	//TODO: Add Coordinates class (rewrite SoldierData) and a static list of goal coordinates 
 }

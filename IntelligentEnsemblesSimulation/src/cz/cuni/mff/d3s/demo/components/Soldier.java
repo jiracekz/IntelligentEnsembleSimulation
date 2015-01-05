@@ -22,13 +22,15 @@ import cz.cuni.mff.d3s.demo.AuditData;
 import cz.cuni.mff.d3s.demo.ComponentUptimeDecider;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.SimulationController;
+import cz.cuni.mff.d3s.demo.assignment.BasicAssignmentCalculator;
+import cz.cuni.mff.d3s.demo.assignment.SoldierAssignmentCalculator;
 
 @Component
 public class Soldier {
 	
 	public String id;
 	
-	public SoldierRole role;
+	//public SoldierRole role;
 	
 	public Integer ensembleId;
 	
@@ -42,17 +44,20 @@ public class Soldier {
 	public Boolean isOnline;
 	
 	//@Local
-	public HashSet<Integer> ensembleMembers;
-	
-	//@Local
 	public ComponentUptimeDecider decider;
+
+	public static SoldierAssignmentCalculator assignmentCalculator;
+	
+	static {
+		assignmentCalculator = new BasicAssignmentCalculator();
+	}
 	
 	public Soldier(Integer id, boolean isOnline, ComponentUptimeDecider decider) {
 		this.id = id.toString();
-		this.role = SoldierRole.Unassigned;
+		//this.role = SoldierRole.Unassigned;
 		this.ensembleId = -1;
 		
-		this.soldierData = new SoldierData(id);
+		this.soldierData = new SoldierData();
 		this.everyone = new HashMap<>();
 		this.everyone.put(this.id, soldierData);
 		
@@ -61,7 +66,7 @@ public class Soldier {
 		
 		this.decider = decider;
 		
-		System.out.println("Created a soldier with id = " + this.id + "; knowledge = " + this.soldierData.knowledge);
+		System.out.println("Created a soldier with id = " + this.id + "; x = " + this.soldierData.x + "; y = " + this.soldierData.y);
 	}
 	
 	@Process
@@ -69,12 +74,10 @@ public class Soldier {
 	public static void inferTeamAndRole(
 			@In("id") String id,
 			@InOut("everyone") ParamHolder<Map<String, SoldierData>> everyone,
-			@InOut("role") ParamHolder<SoldierRole> role,
 			@InOut("ensembleId") ParamHolder<Integer> ensembleId, 
 			@InOut("auditIteration") ParamHolder<Integer> auditIteration,
 			@In("isOnline") Boolean isOnline,
-			@InOut("soldierData") ParamHolder<SoldierData> soldierData,
-			@InOut("ensembleMembers") ParamHolder<HashSet<Integer>> ensembleMembers) {
+			@InOut("soldierData") ParamHolder<SoldierData> soldierData) {
 		
 		if (!isOnline) {
 			return;
@@ -85,61 +88,24 @@ public class Soldier {
 		}
 		
 		Map<String, SoldierData> newEveryone = new HashMap<>();
-		newEveryone.put(id, soldierData.value);
+		//newEveryone.put(id, soldierData.value);
+		newEveryone = everyone.value;
 		
 		// Filter out the old knowledge - could be done in a better way perhaps?
-		for(Entry<String, SoldierData> entry : everyone.value.entrySet()) {
-			if(entry.getKey().equals(id))
-				continue;
-			
-			if(entry.getValue().isAlive(ProcessContext.getTimeProvider().getCurrentMilliseconds())) {
-				newEveryone.put(entry.getKey(), entry.getValue());
-			}				
-		}		
+//		for(Entry<String, SoldierData> entry : everyone.value.entrySet()) {
+//			if(entry.getKey().equals(id))
+//				continue;
+//			
+//			if(entry.getValue().isAlive(ProcessContext.getTimeProvider().getCurrentMilliseconds())) {
+//				newEveryone.put(entry.getKey(), entry.getValue());
+//			}				
+//		}		
 		
-		ensembleMembers.value = calculateEnsembles(id, newEveryone, role, ensembleId);
+		
+		ensembleId.value = assignmentCalculator.AssignEnsemble(id, soldierData.value, newEveryone);
 	}
 
-	public static HashSet<Integer> calculateEnsembles(String id, Map<String, SoldierData> everyone, 
-			ParamHolder<SoldierRole> role, ParamHolder<Integer> ensembleId) {
-		
-		List<Entry<String, SoldierData>> orderedSoldiers = new ArrayList<Entry<String, SoldierData>>(everyone.entrySet());
-		orderedSoldiers.sort(new Comparator<Entry<String, SoldierData>>() {
-			@Override
-			public int compare(Entry<String, SoldierData> o1,
-					Entry<String, SoldierData> o2) {
-				return ((Integer) o1.getValue().knowledge).compareTo(o2.getValue().knowledge) ;
-			}
-		});
-		
-		int offsetInSquad = -1;
-		for (int i = 0; i < orderedSoldiers.size(); i++) {
-			if (id.equals(orderedSoldiers.get(i).getKey())) {
-				ensembleId.value = i / SimulationConstants.SquadSize;
-				offsetInSquad = i % SimulationConstants.SquadSize;
-			}
-		}
-		
-		HashSet<Integer> ensembleMembers = new HashSet<>();
-		for (int i = 0; i < SimulationConstants.SquadSize; i++) {
-			int index = ensembleId.value * SimulationConstants.SquadSize + i;
-			if (index >= orderedSoldiers.size())
-				break;
-			
-			int soldierId = Integer.parseInt(orderedSoldiers.get(index).getKey());
-			ensembleMembers.add(soldierId);
-		}
-				
-		if (offsetInSquad == 0) {
-			role.value = SoldierRole.Leader;
-		} else if (offsetInSquad % 2 == 1) {
-			role.value = SoldierRole.Assault;
-		} else {
-			role.value = SoldierRole.Medic;
-		}
-		
-		return ensembleMembers;
-	}
+	
 	
 	@Process
 	@PeriodicScheduling(period = 1000, offset = 1)
@@ -147,97 +113,79 @@ public class Soldier {
 			@In("isOnline") Boolean isOnline,
 			@In("id") String id,
 			@In("ensembleId") Integer ensembleId,
-			@In("role") SoldierRole role,
-			@In("ensembleMembers") HashSet<Integer> ensembleMembers,
 			@InOut("soldierData") ParamHolder<SoldierData> soldierData,
 			@InOut("auditIteration") ParamHolder<Integer> auditIteration) {
 		
 		if (isOnline) {
-			AuditData auditData = new AuditData();
-			auditData.role = role;
-			auditData.componentsInEnsemble = ensembleMembers;
+			AuditData auditData = new AuditData();		
 			SimulationController.addSnapshot(Integer.parseInt(id), auditIteration.value, auditData, soldierData.value);
-			soldierData.value.timestamp = ProcessContext.getTimeProvider().getCurrentMilliseconds();
 		}
 		
 		auditIteration.value = auditIteration.value + 1;
 	}
 
 	
-	@Process
-	@PeriodicScheduling(period = 1000, offset = 100)
-	public static void updateState(
-			@In("id") String id, 
-			@In("decider") ComponentUptimeDecider decider, 
-			@InOut("isOnline") ParamHolder<Boolean> isOnline,
-			@InOut("role") ParamHolder<SoldierRole> role,
-			@InOut("ensembleId") ParamHolder<Integer> ensembleId,
-			@InOut("ensembleMembers") ParamHolder<HashSet<Integer>> ensembleMembers) {
-		
-		boolean newState = decider.shouldBeOnline(Integer.parseInt(id), ProcessContext.getTimeProvider().getCurrentMilliseconds());
-		
-		if(newState != isOnline.value)
-			System.out.println("Random event! Soldier " + id + (newState ? " has recovered!" : " has been downed!"));		
-		isOnline.value = newState;
-		
-		if (!isOnline.value) {
-			role.value = SoldierRole.Unassigned;
-			ensembleId.value = -1;
-			ensembleMembers.value = null;
-		}
-	}
+//	@Process
+//	@PeriodicScheduling(period = 1000, offset = 100)
+//	public static void updateState(
+//			@In("id") String id, 
+//			@In("decider") ComponentUptimeDecider decider, 
+//			@InOut("isOnline") ParamHolder<Boolean> isOnline,
+//			@InOut("role") ParamHolder<SoldierRole> role,
+//			@InOut("ensembleId") ParamHolder<Integer> ensembleId) {
+//		
+//		boolean newState = decider.shouldBeOnline(Integer.parseInt(id), ProcessContext.getTimeProvider().getCurrentMilliseconds());
+//		
+//		if(newState != isOnline.value)
+//			System.out.println("Random event! Soldier " + id + (newState ? " has recovered!" : " has been downed!"));		
+//		isOnline.value = newState;
+//		
+//		if (!isOnline.value) {
+//			role.value = SoldierRole.Unassigned;
+//			ensembleId.value = -1;			
+//		}
+//	}
 	
 	
 	@Process
 	@PeriodicScheduling(period = 1000, offset = 2)
 	public static void performDuties(
 			@In("id") String id,
-			@In("role") SoldierRole role,
+			@InOut("soldierData") ParamHolder<SoldierData> soldierData,
 			@In("ensembleId") Integer ensembleId,
 			@In("isOnline") Boolean isOnline,
 			@In("ensembleMembers") HashSet<Integer> ensembleMembers) {
 		
 		if (!isOnline) {
-			System.out.println("Soldier " + id + " is down.");
+			//System.out.println("Soldier " + id + " is down.");
 			return;
 		}
 		
-		switch (role) {
-			case Leader:
-				lead(id, ensembleId, ensembleMembers);
-				break;
-			case Assault:
-				fight(id, ensembleId, ensembleMembers);
-				break;
-			case Medic:
-				repair(id, ensembleId, ensembleMembers);
-				break;
-			default:
-				System.out.println("Soldier " + id + " is waiting for squad assignment.");
-				break;		
-		}
-	}
-	
-	public static void lead(String id, int ensembleId, HashSet<Integer> ensembleMembers) {
-		System.out.println("Soldier " + id + " is leading in team " + ensembleId + listMembers(id, ensembleMembers));
-	}
-	
-	public static void fight(String id, int ensembleId, HashSet<Integer> ensembleMembers)	{
-		System.out.println("Soldier " + id + " is fighting in team " + ensembleId + listMembers(id, ensembleMembers));
-	}
-	
-	public static void repair(String id, int ensembleId, HashSet<Integer> ensembleMembers) {
-		System.out.println("Soldier " + id + " is repairing in team " + ensembleId + listMembers(id, ensembleMembers));
-	}
-	
-	public static String listMembers(String id, HashSet<Integer> ensembleMembers) {
-		String result = " with";
-		for (Integer member : ensembleMembers) {
-			if (!member.equals(Integer.parseInt(id))) {
-				result += " " + member + ",";
-			}
-		}
+		soldierData.value.timestamp = ProcessContext.getTimeProvider().getCurrentMilliseconds();
 		
-		return result;
+		//TODO: Calculate position
 	}
+	
+//	public static void lead(String id, int ensembleId, HashSet<Integer> ensembleMembers) {
+//		System.out.println("Soldier " + id + " is leading in team " + ensembleId + listMembers(id, ensembleMembers));
+//	}
+//	
+//	public static void fight(String id, int ensembleId, HashSet<Integer> ensembleMembers)	{
+//		System.out.println("Soldier " + id + " is fighting in team " + ensembleId + listMembers(id, ensembleMembers));
+//	}
+//	
+//	public static void repair(String id, int ensembleId, HashSet<Integer> ensembleMembers) {
+//		System.out.println("Soldier " + id + " is repairing in team " + ensembleId + listMembers(id, ensembleMembers));
+//	}
+//	
+//	public static String listMembers(String id, HashSet<Integer> ensembleMembers) {
+//		String result = " with";
+//		for (Integer member : ensembleMembers) {
+//			if (!member.equals(Integer.parseInt(id))) {
+//				result += " " + member + ",";
+//			}
+//		}
+//		
+//		return result;
+//	}
 }

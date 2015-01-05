@@ -28,7 +28,8 @@ public class ReplicationCoordinationEnsemble {
 	@In("member.id") String memberId,
 	@In("coord.soldierData") SoldierData coordinatorData,
 	@InOut("member.everyone") ParamHolder<Map<String, SoldierData>> memberList,
-	@In("coord.isOnline") Boolean coordIsOnline, @In("member.isOnline") Boolean memberIsOnline ) {
+	@In("coord.isOnline") Boolean coordIsOnline,
+	@In("member.isOnline") Boolean memberIsOnline ) {
 		
 		if (!coordIsOnline || !memberIsOnline) return;
 		
