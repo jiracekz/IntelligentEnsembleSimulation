@@ -26,9 +26,7 @@ public class Soldier {
 	//public SoldierRole role;
 	
 	public Integer ensembleId;
-	
-	public SoldierData soldierData;
-	
+		
 	public Map<String, SoldierData> everyone;
 	
 	public Boolean isOnline;
@@ -47,7 +45,7 @@ public class Soldier {
 		//this.role = SoldierRole.Unassigned;
 		this.ensembleId = -1;
 		
-		this.soldierData = new SoldierData();
+		SoldierData soldierData = new SoldierData();
 		this.everyone = new HashMap<>();
 		this.everyone.put(this.id, soldierData);
 		
@@ -55,17 +53,17 @@ public class Soldier {
 		
 		this.decider = decider;
 		
-		System.out.println("Created a soldier with id = " + this.id + "; coords = " + this.soldierData.coords);
+		System.out.println("Created a soldier with id = " + this.id + "; coords = " + soldierData.coords);
 	}
 	
 	@Process
 	@PeriodicScheduling(period = 1000)
 	public static void inferTeam(
 			@In("id") String id,
-			@InOut("everyone") ParamHolder<Map<String, SoldierData>> everyone,
+			@In("everyone") Map<String, SoldierData> everyone,
 			@InOut("ensembleId") ParamHolder<Integer> ensembleId, 
 			@In("isOnline") Boolean isOnline,
-			@InOut("soldierData") ParamHolder<SoldierData> soldierData) {
+			@In("everyone.[id]") SoldierData soldierData) {
 		
 		if (!isOnline) {
 			return;
@@ -74,10 +72,8 @@ public class Soldier {
 		if (SimulationConstants.IsCentralized) {
 			return;
 		}
-		
-		Map<String, SoldierData> newEveryone = OverallEnsembleCalculator.filterOldKnowledge(everyone.value);
-		
-		ensembleId.value = assignmentCalculator.AssignEnsemble(id, soldierData.value, newEveryone);
+				
+		ensembleId.value = assignmentCalculator.AssignEnsemble(id, soldierData, everyone);
 	}
 
 
@@ -107,7 +103,7 @@ public class Soldier {
 	@PeriodicScheduling(period = 100, offset = 2)
 	public static void performDuties(
 			@In("id") String id,
-			@InOut("soldierData") ParamHolder<SoldierData> soldierData,
+			@InOut("everyone.[id]") ParamHolder<SoldierData> soldierData,
 			@In("ensembleId") Integer ensembleId,
 			@In("isOnline") Boolean isOnline) {
 		

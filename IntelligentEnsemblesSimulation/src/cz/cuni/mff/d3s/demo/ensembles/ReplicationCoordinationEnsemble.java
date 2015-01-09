@@ -26,13 +26,19 @@ public class ReplicationCoordinationEnsemble {
 	public static void assignEnsembles(
 	@In("coord.id") String coordId,
 	@In("member.id") String memberId,
-	@In("coord.soldierData") SoldierData coordinatorData,
+	@In("coord.everyone") Map<String, SoldierData> coordinatorData,
 	@InOut("member.everyone") ParamHolder<Map<String, SoldierData>> memberList,
 	@In("coord.isOnline") Boolean coordIsOnline,
 	@In("member.isOnline") Boolean memberIsOnline ) {
 		
+		// FIXME: why does @In("coord.everyone.[coord.id]") not work??
+		
 		if (!coordIsOnline || !memberIsOnline) return;
 		
-		memberList.value.put(coordId, coordinatorData.clone());
+		if (!memberList.value.containsKey(coordId)) {
+			memberList.value.put(coordId, coordinatorData.get(coordId).clone());
+		} else {
+			memberList.value.replace(coordId, coordinatorData.get(coordId).clone());
+		}
 	}	
 }

@@ -37,8 +37,8 @@ public class SimpleLauncher {
 		System.out.println("Preparing simulation");
 
 		// no delay when transferring knowledge
-		//NetworkDataHandler networkHandler = new DelayedKnowledgeDataHandler(1000);
-		NetworkDataHandler networkHandler = new RandomDelayedKnowledgeDataHandler(0, 4000);
+		//NetworkDataHandler networkHandler = new DelayedKnowledgeDataHandler(1);
+		NetworkDataHandler networkHandler = new RandomDelayedKnowledgeDataHandler(0, 3000);
 		simulation = new JDEECoSimulation(0, SimulationConstants.SimulationLength, networkHandler);
 
 		builder = new SimulationRuntimeBuilder();

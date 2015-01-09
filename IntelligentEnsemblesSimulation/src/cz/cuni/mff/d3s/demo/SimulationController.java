@@ -15,6 +15,12 @@ import cz.cuni.mff.d3s.deeco.knowledge.KnowledgeNotFoundException;
 import cz.cuni.mff.d3s.deeco.knowledge.ReadOnlyKnowledgeManager;
 import cz.cuni.mff.d3s.deeco.knowledge.ValueSet;
 import cz.cuni.mff.d3s.deeco.model.runtime.api.KnowledgePath;
+import cz.cuni.mff.d3s.deeco.model.runtime.api.PathNodeField;
+import cz.cuni.mff.d3s.deeco.model.runtime.api.PathNodeMapKey;
+import cz.cuni.mff.d3s.deeco.model.runtime.custom.RuntimeMetadataFactoryExt;
+import cz.cuni.mff.d3s.deeco.model.runtime.impl.RuntimeMetadataFactoryImpl;
+import cz.cuni.mff.d3s.deeco.model.runtime.meta.RuntimeMetadataFactory;
+import cz.cuni.mff.d3s.deeco.task.KnowledgePathHelper;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
 
 
@@ -41,6 +47,32 @@ public class SimulationController {
 		
 		// TODO write also some stats to another file
 	}
+		
+	private static class KnowledgePathBuilder {
+		private static final RuntimeMetadataFactory factory = RuntimeMetadataFactoryExt.eINSTANCE;
+		
+		public static KnowledgePath buildSimplePath(String pathString) {
+			KnowledgePath kp = factory.createKnowledgePath();
+			
+			for (String part: pathString.split("\\.")) {
+				PathNodeField pn = factory.createPathNodeField();
+				pn.setName(part);
+				kp.getNodes().add(pn);
+			}
+			
+			return kp;
+		}
+		
+		public static KnowledgePath createMapKey(String pathString, String index) {
+			KnowledgePath indexPath = buildSimplePath(index);
+			PathNodeMapKey mapKey = factory.createPathNodeMapKey();
+			mapKey.setKeyPath(indexPath);
+			
+			KnowledgePath kp = buildSimplePath(pathString);
+			kp.getNodes().add(mapKey);
+			return kp;
+		}
+	}
 	
 	// returns all components (even offline)
 	private static Map<String, AuditData> constructAuditData(Map<String, KnowledgeManager> knowledgeManagers) throws KnowledgeNotFoundException {
@@ -48,24 +80,16 @@ public class SimulationController {
 
 		for (Entry<String, KnowledgeManager> managerEntry : knowledgeManagers.entrySet()) {
 			KnowledgeManager manager = managerEntry.getValue();
-			KnowledgePath soldierDataKnowledgePath = null;
-			KnowledgePath ensembleIdKnowledgePath = null;
-			for (KnowledgePath path : manager.getKnowledgePaths()) {
-				String pathStr = path.toString();
-				if (pathStr.equals("soldierData")) {
-					assert soldierDataKnowledgePath == null;
-					soldierDataKnowledgePath = path;
-				} else if (pathStr.equals("ensembleId")) {
-					assert ensembleIdKnowledgePath == null;
-					ensembleIdKnowledgePath = path;
-				}
-			}
-			assert soldierDataKnowledgePath != null;
-			assert ensembleIdKnowledgePath != null;
+			// TODO refactor deeco and introduce method that would create a KnowledgePath from string,
+			//   then refactor this
+			KnowledgePath ensembleIdKnowledgePath = KnowledgePathBuilder.buildSimplePath("ensembleId");
+			KnowledgePath soldierDataKnowledgePath = KnowledgePathBuilder.createMapKey("everyone", "id");
+			
+			soldierDataKnowledgePath = KnowledgePathHelper.getAbsolutePath(soldierDataKnowledgePath, manager);
 			
 			ArrayList<KnowledgePath> knowledgePaths = new ArrayList<>();
-			knowledgePaths.add(soldierDataKnowledgePath);
 			knowledgePaths.add(ensembleIdKnowledgePath);
+			knowledgePaths.add(soldierDataKnowledgePath);
 			ValueSet valueSet = manager.get(knowledgePaths);
 			AuditData auditData = new AuditData();
 			auditData.soldierData = (SoldierData)valueSet.getValue(soldierDataKnowledgePath);
