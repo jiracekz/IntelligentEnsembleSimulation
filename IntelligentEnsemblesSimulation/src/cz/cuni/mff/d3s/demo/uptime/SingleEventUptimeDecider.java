@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.uptime;
+package cz.cuni.mff.d3s.demo.uptime;
 
 import cz.cuni.mff.d3s.demo.SimulationConstants;
 

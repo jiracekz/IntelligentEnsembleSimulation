@@ -16,7 +16,7 @@ import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.assignment.BasicAssignmentCalculator;
 import cz.cuni.mff.d3s.demo.assignment.OverallEnsembleCalculator;
 import cz.cuni.mff.d3s.demo.assignment.SoldierAssignmentCalculator;
-import cz.cuni.mff.d3s.uptime.ComponentUptimeDecider;
+import cz.cuni.mff.d3s.demo.uptime.ComponentUptimeDecider;
 
 @Component
 public class Soldier {

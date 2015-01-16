@@ -1,6 +1,5 @@
-package cz.cuni.mff.d3s.demo;
+package cz.cuni.mff.d3s.demo.audit;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,21 +11,41 @@ import java.util.Map.Entry;
 
 import cz.cuni.mff.d3s.deeco.knowledge.KnowledgeManager;
 import cz.cuni.mff.d3s.deeco.knowledge.KnowledgeNotFoundException;
-import cz.cuni.mff.d3s.deeco.knowledge.ReadOnlyKnowledgeManager;
 import cz.cuni.mff.d3s.deeco.knowledge.ValueSet;
 import cz.cuni.mff.d3s.deeco.model.runtime.api.KnowledgePath;
 import cz.cuni.mff.d3s.deeco.model.runtime.api.PathNodeField;
 import cz.cuni.mff.d3s.deeco.model.runtime.api.PathNodeMapKey;
 import cz.cuni.mff.d3s.deeco.model.runtime.custom.RuntimeMetadataFactoryExt;
-import cz.cuni.mff.d3s.deeco.model.runtime.impl.RuntimeMetadataFactoryImpl;
 import cz.cuni.mff.d3s.deeco.model.runtime.meta.RuntimeMetadataFactory;
 import cz.cuni.mff.d3s.deeco.task.KnowledgePathHelper;
+import cz.cuni.mff.d3s.demo.Coordinates;
+import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
 
 
 public class SimulationController {
 	
-	private static String graphFileName = "results/audit%07d.txt";
+	private static String graphFileName = "results/audit%07d.dot";
+	
+	private static FileWriter statsFileWriter;
+	
+	static {
+		try {
+			statsFileWriter = new FileWriter("results/stats.csv");
+		} catch (IOException e) {
+			System.out.println("IO error while creating stats.csv file.");
+		}
+	}
+	
+	//
+	// Each time doAudit is called, following steps are performed:
+	//
+	// 1) Soldier status is printed out to console.
+	//
+	// 2) Soldier positions are printed out to DOT file which is later processed by GraphViz.
+	//
+	// 3) Statistical data are printed out to CSV file which can be later processed in Excel.
+	//
 	
 	public static void doAudit(long time, Map<String, KnowledgeManager> knowledgeManagers) {
 		
@@ -39,13 +58,18 @@ public class SimulationController {
 		}
 		
 		printState(currentSoldierData);
+		
 		try {
 			saveGraph(String.format(graphFileName, time), currentSoldierData);
 		} catch (IOException ioe) {
 			System.out.println("IO error while saving results.");
 		}
 		
-		// TODO write also some stats to another file
+		try {
+			saveStats(statsFileWriter, currentSoldierData);
+		} catch (IOException e) {
+			System.out.println("IO error while saving stats.");
+		}
 	}
 		
 	private static class KnowledgePathBuilder {
@@ -100,12 +124,20 @@ public class SimulationController {
 		return result;
 	}
 	
+	//
+	// printing state to console
+	//
+	
 	private static void printState(Map<String, AuditData> soldierData) {
 		for (Entry<String, AuditData> soldierEntry : soldierData.entrySet()) {
 			System.out.printf("Soldier #%s: group = %d, coords = %s\n", soldierEntry.getKey(), soldierEntry.getValue().ensembleId,
 					soldierEntry.getValue().soldierData.coords.toString());
 		}
 	}
+	
+	//
+	// printing positions to DOT file
+	//
 		
 	private static void saveGraph(String filename, Map<String, AuditData> soldierData) throws IOException	{				
 		File outputFile = new File(filename);
@@ -153,5 +185,19 @@ public class SimulationController {
 		} else {
 			return "grey";
 		}
+	}
+	
+	//
+	// printing statistical data
+	//
+	
+	private static void saveStats(FileWriter fileWriter, Map<String, AuditData> soldierData) throws IOException {
+		
+		PrintWriter writer = new PrintWriter(fileWriter);
+		
+		
+		
+		writer.println();		
+		
 	}
 }

@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.demo;
+package cz.cuni.mff.d3s.demo.audit;
 
 import java.util.Set;
 

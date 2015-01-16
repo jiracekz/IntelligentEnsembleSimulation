@@ -10,6 +10,7 @@ import cz.cuni.mff.d3s.deeco.simulation.TimerTaskListener;
 import cz.cuni.mff.d3s.deeco.simulation.scheduler.SimulationScheduler;
 import cz.cuni.mff.d3s.deeco.simulation.task.SimulationStepTask;
 import cz.cuni.mff.d3s.deeco.simulation.task.TimerTask;
+import cz.cuni.mff.d3s.demo.audit.SimulationController;
 
 public class AuditListener implements TimerTaskListener {
 
