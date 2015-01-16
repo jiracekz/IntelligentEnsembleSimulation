@@ -33,8 +33,6 @@ public class SimpleLauncher {
 	
 	public static void main(String[] args) throws AnnotationProcessorException {
 		
-		Locale.setDefault(Locale.US);
-		
 		System.out.println("Preparing simulation");
 
 		// no delay when transferring knowledge

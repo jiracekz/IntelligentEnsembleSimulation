@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -20,6 +22,11 @@ import cz.cuni.mff.d3s.deeco.model.runtime.meta.RuntimeMetadataFactory;
 import cz.cuni.mff.d3s.deeco.task.KnowledgePathHelper;
 import cz.cuni.mff.d3s.demo.Coordinates;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
+import cz.cuni.mff.d3s.demo.audit.stats.NumOfGroupsCompleteStatistic;
+import cz.cuni.mff.d3s.demo.audit.stats.Statistic;
+import cz.cuni.mff.d3s.demo.audit.stats.SumDistanceToTargetStatistic;
+import cz.cuni.mff.d3s.demo.audit.stats.TotalMovesStatistic;
+import cz.cuni.mff.d3s.demo.audit.stats.WellPlacedSoldiersStatistic;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
 
 
@@ -29,9 +36,28 @@ public class SimulationController {
 	
 	private static FileWriter statsFileWriter;
 	
+	private static List<Statistic> statsList;
+	
+	public static double totalMoves = 0.0;
+	
 	static {
+		statsList = new ArrayList<Statistic>();
+		statsList.add(new TotalMovesStatistic());
+		statsList.add(new SumDistanceToTargetStatistic());
+		statsList.add(new WellPlacedSoldiersStatistic());
+		statsList.add(new NumOfGroupsCompleteStatistic());
+
 		try {
 			statsFileWriter = new FileWriter("results/stats.csv");
+		
+			statsFileWriter.write("Time");
+			for (Statistic stat : statsList) {
+				statsFileWriter.write(stat.getName() + ";");
+			}
+
+			statsFileWriter.write("\n");
+			statsFileWriter.flush();
+			
 		} catch (IOException e) {
 			System.out.println("IO error while creating stats.csv file.");
 		}
@@ -66,7 +92,7 @@ public class SimulationController {
 		}
 		
 		try {
-			saveStats(statsFileWriter, currentSoldierData);
+			saveStats(statsFileWriter, time, currentSoldierData);
 		} catch (IOException e) {
 			System.out.println("IO error while saving stats.");
 		}
@@ -174,7 +200,7 @@ public class SimulationController {
 	}
 	
 	private static String formatPos(Coordinates coords) {
-		return String.format("\"%f,%f\"", coords.getX(), coords.getY());
+		return String.format(Locale.US, "\"%f,%f\"", coords.getX(), coords.getY());
 	}
 	
 	private static final String[] colors = new String[] { "red", "blue", "green", "purple" };
@@ -191,13 +217,17 @@ public class SimulationController {
 	// printing statistical data
 	//
 	
-	private void saveStats(FileWriter fileWriter, Map<String, AuditData> soldierData) throws IOException {
+	private void saveStats(FileWriter fileWriter, long time, Map<String, AuditData> soldierData) throws IOException {
 		
 		PrintWriter writer = new PrintWriter(fileWriter);
 		
-		
+		writer.printf("%d;", time);
+		for (Statistic stat : statsList) {
+			writer.printf("%s;", stat.calculate(soldierData));
+		}
 		
 		writer.println();		
+		writer.flush();
 		
 	}
 }

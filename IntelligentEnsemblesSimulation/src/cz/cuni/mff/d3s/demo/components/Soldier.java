@@ -16,6 +16,7 @@ import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.assignment.BasicAssignmentCalculator;
 import cz.cuni.mff.d3s.demo.assignment.OverallEnsembleCalculator;
 import cz.cuni.mff.d3s.demo.assignment.SoldierAssignmentCalculator;
+import cz.cuni.mff.d3s.demo.audit.SimulationController;
 import cz.cuni.mff.d3s.demo.uptime.ComponentUptimeDecider;
 
 @Component
@@ -116,11 +117,13 @@ public class Soldier {
 		
 		if (ensembleId < 0)
 			return;
-		
+				
 		Coordinates target = SimulationConstants.TargetCoordinates[ensembleId];
 		if (soldierData.value.coords.getDistanceTo(target) > SimulationConstants.MovementPerIteration) {
 			soldierData.value.coords = soldierData.value.coords.moveVectorTo(target, SimulationConstants.MovementPerIteration);
+			SimulationController.totalMoves += SimulationConstants.MovementPerIteration;
 		} else {
+			SimulationController.totalMoves += target.getDistanceTo(soldierData.value.coords);		
 			soldierData.value.coords = target;
 		}
 	}
