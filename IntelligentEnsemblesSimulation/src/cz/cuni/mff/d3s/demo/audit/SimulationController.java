@@ -32,9 +32,9 @@ import cz.cuni.mff.d3s.demo.components.SoldierData;
 
 public class SimulationController {
 	
-	private static String graphFileName = "results/audit%07d.dot";
+	private String graphFileName;
 	
-	private static FileWriter statsFileWriter;
+	private FileWriter statsFileWriter;
 	
 	private static List<Statistic> statsList;
 	
@@ -47,10 +47,18 @@ public class SimulationController {
 		statsList.add(new WellPlacedSoldiersStatistic());
 		statsList.add(new NumOfGroupsCompleteStatistic());
 
-		try {
-			statsFileWriter = new FileWriter("results/stats.csv");
+	}
+	
+	public SimulationController(String outputName) {
+		String outputDirName = "results/" + outputName;
+		new File(outputDirName).mkdirs();
 		
-			statsFileWriter.write("Time");
+		graphFileName = outputDirName + "/audit%07d.dot";
+
+		try {
+			statsFileWriter = new FileWriter("results/stats_" + outputName + ".csv");
+		
+			statsFileWriter.write("Time;");
 			for (Statistic stat : statsList) {
 				statsFileWriter.write(stat.getName() + ";");
 			}
@@ -59,8 +67,8 @@ public class SimulationController {
 			statsFileWriter.flush();
 			
 		} catch (IOException e) {
-			System.out.println("IO error while creating stats.csv file.");
-		}
+			System.err.println("IO error while creating stats CSV file.");
+		}		
 	}
 	
 	//
@@ -79,7 +87,7 @@ public class SimulationController {
 		try {
 			currentSoldierData = constructAuditData(knowledgeManagers);
 		} catch (KnowledgeNotFoundException e) {
-			System.out.println("Knowledge not found.");
+			System.err.println("Knowledge not found.");
 			return;
 		}
 		
@@ -88,13 +96,13 @@ public class SimulationController {
 		try {
 			saveGraph(String.format(graphFileName, time), currentSoldierData);
 		} catch (IOException ioe) {
-			System.out.println("IO error while saving results.");
+			System.err.println("IO error while saving results.");
 		}
 		
 		try {
 			saveStats(statsFileWriter, time, currentSoldierData);
 		} catch (IOException e) {
-			System.out.println("IO error while saving stats.");
+			System.err.println("IO error while saving stats.");
 		}
 	}
 		
