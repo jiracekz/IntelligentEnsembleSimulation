@@ -14,9 +14,12 @@ import cz.cuni.mff.d3s.demo.audit.SimulationController;
 
 public class AuditListener implements TimerTaskListener {
 
-	RuntimeFramework[] runtimes;
+	private SimulationController simulationController;
 	
-	public AuditListener(RuntimeFramework[] runtimes) {
+	private RuntimeFramework[] runtimes;
+	
+	public AuditListener(SimulationController simulationController, RuntimeFramework[] runtimes) {
+		this.simulationController = simulationController;
 		this.runtimes = runtimes;
 	}
 	
@@ -32,7 +35,7 @@ public class AuditListener implements TimerTaskListener {
 			knowledgeManagers.put(Integer.toString(i), manager);
 		}
 		
-		SimulationController.doAudit(time, knowledgeManagers);
+		simulationController.doAudit(time, knowledgeManagers);
 		
 		SimulationStepTask task = (SimulationStepTask) triger;
 		task.scheduleNextExecutionAfter(SimulationConstants.SnapshotInterval);

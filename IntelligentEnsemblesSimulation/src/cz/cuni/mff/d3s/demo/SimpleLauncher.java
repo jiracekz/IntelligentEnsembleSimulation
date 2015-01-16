@@ -18,6 +18,7 @@ import cz.cuni.mff.d3s.deeco.simulation.JDEECoSimulation;
 import cz.cuni.mff.d3s.deeco.simulation.NetworkDataHandler;
 import cz.cuni.mff.d3s.deeco.simulation.SimulationRuntimeBuilder;
 import cz.cuni.mff.d3s.deeco.simulation.TimerTaskListener;
+import cz.cuni.mff.d3s.demo.audit.SimulationController;
 import cz.cuni.mff.d3s.demo.components.Soldier;
 import cz.cuni.mff.d3s.demo.components.SoldierDirectionsCenter;
 import cz.cuni.mff.d3s.demo.ensembles.CentralizedCoordinationEnsemble;
@@ -72,7 +73,7 @@ public class SimpleLauncher {
 		
 		DirectSimulationHost[] hosts = new DirectSimulationHost[SimulationConstants.SoldierCount];
 		RuntimeFramework runtimes[] = new RuntimeFramework[SimulationConstants.SoldierCount];
-		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener(runtimes), (TimerTaskListener) networkHandler);
+		List<TimerTaskListener> listeners = Arrays.asList(new AuditListener(new SimulationController(), runtimes), (TimerTaskListener) networkHandler);
 		List<TimerTaskListener> listeners0 = Arrays.asList((TimerTaskListener) networkHandler);
 		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {
 			hosts[i] = simulation.getHost("Host" + i);

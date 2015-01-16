@@ -47,7 +47,7 @@ public class SimulationController {
 	// 3) Statistical data are printed out to CSV file which can be later processed in Excel.
 	//
 	
-	public static void doAudit(long time, Map<String, KnowledgeManager> knowledgeManagers) {
+	public void doAudit(long time, Map<String, KnowledgeManager> knowledgeManagers) {
 		
 		Map<String, AuditData> currentSoldierData;
 		try {
@@ -99,7 +99,7 @@ public class SimulationController {
 	}
 	
 	// returns all components (even offline)
-	private static Map<String, AuditData> constructAuditData(Map<String, KnowledgeManager> knowledgeManagers) throws KnowledgeNotFoundException {
+	private Map<String, AuditData> constructAuditData(Map<String, KnowledgeManager> knowledgeManagers) throws KnowledgeNotFoundException {
 		Map<String, AuditData> result = new HashMap<>();
 
 		for (Entry<String, KnowledgeManager> managerEntry : knowledgeManagers.entrySet()) {
@@ -128,7 +128,7 @@ public class SimulationController {
 	// printing state to console
 	//
 	
-	private static void printState(Map<String, AuditData> soldierData) {
+	private void printState(Map<String, AuditData> soldierData) {
 		for (Entry<String, AuditData> soldierEntry : soldierData.entrySet()) {
 			System.out.printf("Soldier #%s: group = %d, coords = %s\n", soldierEntry.getKey(), soldierEntry.getValue().ensembleId,
 					soldierEntry.getValue().soldierData.coords.toString());
@@ -139,7 +139,7 @@ public class SimulationController {
 	// printing positions to DOT file
 	//
 		
-	private static void saveGraph(String filename, Map<String, AuditData> soldierData) throws IOException	{				
+	private void saveGraph(String filename, Map<String, AuditData> soldierData) throws IOException	{				
 		File outputFile = new File(filename);
 		FileWriter fileWriter = new FileWriter(outputFile);
 		PrintWriter writer = new PrintWriter(fileWriter);
@@ -191,7 +191,7 @@ public class SimulationController {
 	// printing statistical data
 	//
 	
-	private static void saveStats(FileWriter fileWriter, Map<String, AuditData> soldierData) throws IOException {
+	private void saveStats(FileWriter fileWriter, Map<String, AuditData> soldierData) throws IOException {
 		
 		PrintWriter writer = new PrintWriter(fileWriter);
 		
