@@ -105,12 +105,16 @@ public class SimpleLauncher {
 	}
 
 	private static SimulationController processArguments(String[] args) {
-		// argument 0 - the output name (optional, default = "default")
-		SimulationController result;
-		if (args.length > 0) {
-			result = new SimulationController(args[0]);
-		} else {
-			result = new SimulationController("default");
+		// argument 3 - the random seed
+		// (optional, default = keep 42 in SimulationConstants)
+		if (args.length > 3) {
+			SimulationConstants.RandomSeed = Integer.parseInt(args[3]);
+		}
+		
+		// argument 2 - the number of soldiers
+		// (optional, default = keep default in SimulationConstants)
+		if (args.length > 2) {
+			SimulationConstants.SoldierCount = Integer.parseInt(args[2]);
 		}
 		
 		// argument 1 - the centralized/decentralized version switch
@@ -123,13 +127,14 @@ public class SimpleLauncher {
 				SimulationConstants.IsCentralized = true;
 			}
 		}
-		
-		// argument 2 - the number of soldiers
-		// (optional, default = keep default in SimulationConstants)
-		if (args.length > 2) {
-			SimulationConstants.SoldierCount = Integer.parseInt(args[2]);
-		}
-		
+						
+		// argument 0 - the output name (optional, default = "default")
+		SimulationController result;
+		if (args.length > 0) {
+			result = new SimulationController(args[0]);
+		} else {
+			result = new SimulationController("default");
+		}		
 		return result;
 	}
 

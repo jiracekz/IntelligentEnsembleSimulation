@@ -13,7 +13,7 @@ public class ComponentUptimeDecider {
 	private static Random random;
 	
 	static {
-		random = new Random(42);
+		random = new Random(SimulationConstants.RandomSeed);
 	}
 	
 	public ComponentUptimeDecider(ComponentUptimeDeciderGenerator generator, int iterationCount) {

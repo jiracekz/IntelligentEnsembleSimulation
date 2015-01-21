@@ -11,6 +11,8 @@ public class SimulationConstants {
 	public static float SoldierDownProbability = 0.2f;
 	public static float SoldierUpProbability = 0.2f;
 	
+	public static int RandomSeed = 42;
+	
 	public static double MovementPerIteration = 2;
 	public static double FieldWidth = 1000;
 	public static double FieldHeight = 1000;

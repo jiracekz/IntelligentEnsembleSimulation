@@ -14,7 +14,7 @@ public class SoldierData {
 	private static Random generator;
 	
 	static {
-		generator = new Random(42);
+		generator = new Random(SimulationConstants.RandomSeed);
 	}
 	
 	public SoldierData(double x, double y) {

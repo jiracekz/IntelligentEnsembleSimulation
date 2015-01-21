@@ -58,6 +58,9 @@ public class SimulationController {
 		try {
 			statsFileWriter = new FileWriter("results/stats_" + outputName + ".csv");
 		
+			statsFileWriter.write(String.format("PARAMETERS: IsCentralized=%b, SoldierCount=%d, RandomSeed=%d\n", 
+					SimulationConstants.IsCentralized, SimulationConstants.SoldierCount, SimulationConstants.RandomSeed));
+			
 			statsFileWriter.write("Time;");
 			for (Statistic stat : statsList) {
 				statsFileWriter.write(stat.getName() + ";");

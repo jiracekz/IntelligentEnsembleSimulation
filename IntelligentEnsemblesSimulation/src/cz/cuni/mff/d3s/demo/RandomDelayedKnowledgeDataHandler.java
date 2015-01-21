@@ -31,7 +31,7 @@ public class RandomDelayedKnowledgeDataHandler extends NetworkDataHandler implem
 	private static Random generator;
 	
 	static {
-		generator = new Random(42);
+		generator = new Random(SimulationConstants.RandomSeed);
 	}
 	
 	public RandomDelayedKnowledgeDataHandler(long minDelay, long maxDelay) {

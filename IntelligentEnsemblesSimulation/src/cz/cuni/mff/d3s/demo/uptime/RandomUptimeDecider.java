@@ -9,7 +9,7 @@ public class RandomUptimeDecider implements ComponentUptimeDeciderGenerator {
 	private static Random generator;
 	
 	static {
-		generator = new Random(42);		
+		generator = new Random(SimulationConstants.RandomSeed);		
 	}
 	
 	@Override
