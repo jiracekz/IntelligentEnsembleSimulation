@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -145,16 +146,19 @@ public class SimulationController {
 			//   then refactor this
 			KnowledgePath ensembleIdKnowledgePath = KnowledgePathBuilder.buildSimplePath("ensembleId");
 			KnowledgePath soldierDataKnowledgePath = KnowledgePathBuilder.createMapKey("everyone", "id");
+			KnowledgePath isOnlineKnowledgePath = KnowledgePathBuilder.buildSimplePath("isOnline");
 			
 			soldierDataKnowledgePath = KnowledgePathHelper.getAbsolutePath(soldierDataKnowledgePath, manager);
 			
 			ArrayList<KnowledgePath> knowledgePaths = new ArrayList<>();
 			knowledgePaths.add(ensembleIdKnowledgePath);
 			knowledgePaths.add(soldierDataKnowledgePath);
+			knowledgePaths.add(isOnlineKnowledgePath);
 			ValueSet valueSet = manager.get(knowledgePaths);
 			AuditData auditData = new AuditData();
 			auditData.soldierData = (SoldierData)valueSet.getValue(soldierDataKnowledgePath);
 			auditData.ensembleId = (Integer)valueSet.getValue(ensembleIdKnowledgePath);
+			auditData.isOnline = (Boolean)valueSet.getValue(isOnlineKnowledgePath);
 			result.put(managerEntry.getKey(), auditData);
 		}
 		
@@ -167,8 +171,12 @@ public class SimulationController {
 	
 	private void printState(Map<String, AuditData> soldierData) {
 		for (Entry<String, AuditData> soldierEntry : soldierData.entrySet()) {
-			System.out.printf("Soldier #%s: group = %d, coords = %s\n", soldierEntry.getKey(), soldierEntry.getValue().ensembleId,
-					soldierEntry.getValue().soldierData.coords.toString());
+			if (soldierEntry.getValue().isOnline) {
+				System.out.printf("Soldier #%s: group = %d, coords = %s\n", soldierEntry.getKey(), soldierEntry.getValue().ensembleId,
+						soldierEntry.getValue().soldierData.coords.toString());
+			} else {
+				System.out.printf("Soldier #%s: offline\n", soldierEntry.getKey());
+			}
 		}
 	}
 	
@@ -183,17 +191,20 @@ public class SimulationController {
 		
 		writer.println("digraph {");
 
+		int[] numsInCorners = getGroupSizes(soldierData.values());
+		
 		// the four corners
-		writer.println("a [pos=\"0,0\", style=invis]");
-		writer.printf ("b [pos=\"0,%f\", style=invis]\n", SimulationConstants.FieldHeight);
-		writer.printf ("c [pos=\"%f,0\", style=invis]\n", SimulationConstants.FieldWidth);
-		writer.printf ("b [pos=\"%f,%f\", style=invis]\n", SimulationConstants.FieldWidth, SimulationConstants.FieldHeight);
+		// WARNING: THIS ASSUMES THAT THERE ARE FOUR TARGETS IN A SPECIFIC ORDER!!
+		writer.printf("a [label=\"%d\", pos=\"-10,-10\", shape=circle, width=0.004, height=0.004]\n", numsInCorners[0]);
+		writer.printf("b [label=\"%d\", pos=\"-10,%f\", shape=circle, width=0.004, height=0.004]\n", numsInCorners[1], SimulationConstants.FieldHeight + 10);
+		writer.printf("c [label=\"%d\", pos=\"%f,-10\", shape=circle, width=0.004, height=0.004]\n", numsInCorners[2], SimulationConstants.FieldWidth + 10);
+		writer.printf("d [label=\"%d\", pos=\"%f,%f\", shape=circle, width=0.004, height=0.004]\n", numsInCorners[3], SimulationConstants.FieldWidth + 10, SimulationConstants.FieldHeight + 10);
 		writer.println();
 		
 		// the target places
 		int i = 0;
 		for (Coordinates coords : SimulationConstants.TargetCoordinates) {
-			writer.printf("T%d [pos=%s, shape=box, color=%s]\n", i, formatPos(coords), getColor(i));
+			writer.printf("T%d [pos=%s, shape=box, color=%s]\n", i, formatPos(coords), getColor(true, i));
 			i++;
 		}
 		
@@ -202,7 +213,7 @@ public class SimulationController {
 		for (Entry<String, AuditData> soldierEntry : soldierData.entrySet()) {
 			AuditData soldier = soldierEntry.getValue();
 			writer.printf("S%s [pos=%s, color=%s, width=0.02, height=0.02]\n", soldierEntry.getKey(), 
-					formatPos(soldier.soldierData.coords), getColor(soldier.ensembleId));
+					formatPos(soldier.soldierData.coords), getColor(soldier.isOnline, soldier.ensembleId));
 		}
 		
 		writer.println("}");
@@ -216,12 +227,27 @@ public class SimulationController {
 	
 	private static final String[] colors = new String[] { "red", "blue", "green", "purple" };
 	
-	private static String getColor(int groupId) {
-		if (groupId >= 0) {
-			return colors[groupId % colors.length];
+	private static String getColor(boolean isOnline, int groupId) {
+		if (isOnline) {
+			if (groupId >= 0) {
+				return colors[groupId % colors.length];
+			} else {
+				return "black";
+			}
 		} else {
 			return "grey";
 		}
+	}
+	
+	private static int[] getGroupSizes(Collection<AuditData> soldierData) {
+		int[] result = new int[SimulationConstants.TargetCoordinates.length];
+		for (AuditData soldier : soldierData) {
+			if (soldier.isOnline && soldier.ensembleId >= 0) {
+				result[soldier.ensembleId]++;
+			}
+		}
+		
+		return result;
 	}
 	
 	//

@@ -17,7 +17,7 @@ public class SumDistanceToTargetStatistic implements Statistic {
 	public String calculate(Map<String, AuditData> soldierData) {
 		double sum = 0.0;
 		for (AuditData ad : soldierData.values()) {
-			if (ad.ensembleId >= 0) {
+			if (ad.isOnline && ad.ensembleId >= 0) {
 				Coordinates target = SimulationConstants.TargetCoordinates[ad.ensembleId];
 				sum += target.getDistanceTo(ad.soldierData.coords);
 			}

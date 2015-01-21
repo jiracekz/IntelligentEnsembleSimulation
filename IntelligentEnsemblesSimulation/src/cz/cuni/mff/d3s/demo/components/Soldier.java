@@ -58,7 +58,7 @@ public class Soldier {
 	}
 	
 	@Process
-	@PeriodicScheduling(period = 1000)
+	@PeriodicScheduling(period = 1000, offset = 1)
 	public static void inferTeam(
 			@In("id") String id,
 			@In("everyone") Map<String, SoldierData> everyone,
@@ -78,26 +78,24 @@ public class Soldier {
 	}
 
 
-//	@Process
-//	@PeriodicScheduling(period = 1000, offset = 100)
-//	public static void updateState(
-//			@In("id") String id, 
-//			@In("decider") ComponentUptimeDecider decider, 
-//			@InOut("isOnline") ParamHolder<Boolean> isOnline,
-//			@InOut("role") ParamHolder<SoldierRole> role,
-//			@InOut("ensembleId") ParamHolder<Integer> ensembleId) {
-//		
-//		boolean newState = decider.shouldBeOnline(Integer.parseInt(id), ProcessContext.getTimeProvider().getCurrentMilliseconds());
-//		
-//		if(newState != isOnline.value)
-//			System.out.println("Random event! Soldier " + id + (newState ? " has recovered!" : " has been downed!"));		
-//		isOnline.value = newState;
-//		
-//		if (!isOnline.value) {
-//			role.value = SoldierRole.Unassigned;
-//			ensembleId.value = -1;			
-//		}
-//	}
+	@Process
+	@PeriodicScheduling(period = 1000, offset = 0)
+	public static void updateState(
+			@In("id") String id, 
+			@In("decider") ComponentUptimeDecider decider, 
+			@InOut("isOnline") ParamHolder<Boolean> isOnline,
+			@InOut("ensembleId") ParamHolder<Integer> ensembleId) {
+		
+		boolean newState = decider.shouldBeOnline(Integer.parseInt(id), ProcessContext.getTimeProvider().getCurrentMilliseconds());
+		
+		if(newState != isOnline.value)
+			System.out.println("Random event! Soldier " + id + (newState ? " has recovered!" : " has been downed!"));		
+		isOnline.value = newState;
+		
+		if (!isOnline.value) {
+			ensembleId.value = -1;			
+		}
+	}
 	
 	
 	@Process

@@ -16,7 +16,7 @@ public class WellPlacedSoldiersStatistic implements Statistic {
 	public static int[] getNumAtTargets(Map<String, AuditData> soldierData) {
 		int[] numAtTarget = new int[SimulationConstants.TargetCoordinates.length];
 		for (AuditData ad : soldierData.values()) {
-			if (ad.ensembleId >= 0) {
+			if (ad.isOnline && ad.ensembleId >= 0) {
 				Coordinates target = SimulationConstants.TargetCoordinates[ad.ensembleId];
 				if (target.getDistanceTo(ad.soldierData.coords) < 0.01) {
 					numAtTarget[ad.ensembleId]++;

@@ -27,11 +27,10 @@ public class ComponentUptimeDecider {
 	
 	public boolean shouldBeOnline(int id, long time) {
 		
-		return true;
-/*		if(uptimeData == null)
+		if(uptimeData == null)
 			return true;
 		
-		return uptimeData[(int)(time / 1000)][id];*/
+		return uptimeData[(int)(time / 1000)][id];
 	}
 	
 	public void generateUptimeData() {		

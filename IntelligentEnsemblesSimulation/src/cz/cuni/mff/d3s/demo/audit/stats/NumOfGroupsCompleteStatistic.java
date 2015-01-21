@@ -13,6 +13,16 @@ public class NumOfGroupsCompleteStatistic implements Statistic {
 		return "Num. Groups Complete";
 	}
 
+	public static int getOnlineSoldierCount(Map<String, AuditData> soldierData) {
+		int num = 0;
+		for (AuditData ad : soldierData.values()) {
+			if (ad.isOnline) {
+				num++;
+			}
+		}
+		
+		return num;
+	}
 
 	@Override
 	public String calculate(Map<String, AuditData> soldierData) {
