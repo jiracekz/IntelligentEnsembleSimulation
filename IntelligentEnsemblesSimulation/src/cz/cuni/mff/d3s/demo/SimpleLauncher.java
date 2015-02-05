@@ -1,14 +1,18 @@
 package cz.cuni.mff.d3s.demo;
 
+import java.security.KeyStoreException;
 import java.util.Arrays;
 import java.util.List;
 
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessor;
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessorException;
+import cz.cuni.mff.d3s.deeco.integrity.RatingsManagerImpl;
 import cz.cuni.mff.d3s.deeco.knowledge.CloningKnowledgeManagerFactory;
 import cz.cuni.mff.d3s.deeco.model.runtime.api.RuntimeMetadata;
 import cz.cuni.mff.d3s.deeco.model.runtime.custom.RuntimeMetadataFactoryExt;
 import cz.cuni.mff.d3s.deeco.runtime.RuntimeFramework;
+import cz.cuni.mff.d3s.deeco.security.SecurityKeyManager;
+import cz.cuni.mff.d3s.deeco.security.SecurityKeyManagerImpl;
 import cz.cuni.mff.d3s.deeco.simulation.DirectSimulationHost;
 import cz.cuni.mff.d3s.deeco.simulation.JDEECoSimulation;
 import cz.cuni.mff.d3s.deeco.simulation.NetworkDataHandler;
@@ -27,7 +31,7 @@ public class SimpleLauncher {
 	private static JDEECoSimulation simulation;
 	private static SimulationRuntimeBuilder builder;
 	
-	public static void main(String[] args) throws AnnotationProcessorException {
+	public static void main(String[] args) throws AnnotationProcessorException, KeyStoreException {
 		
 		// for bad times
 		//System.out.println(System.getProperty("java.class.path"));
@@ -78,7 +82,7 @@ public class SimpleLauncher {
 			hosts[i] = simulation.getHost("Host" + i);
 			runtimes[i] = builder.build(hosts[i], simulation, i == 0 ? listeners : listeners0, models[i], 
 					new AlwaysRebroadcastingKnowledgeDataManager(models[i].getEnsembleDefinitions(), null), 
-					new CloningKnowledgeManagerFactory());
+					new CloningKnowledgeManagerFactory(), SecurityKeyManagerImpl.getInstance(), RatingsManagerImpl.getInstance());
 			runtimes[i].start();
 		}
 		
@@ -93,7 +97,7 @@ public class SimpleLauncher {
 			DirectSimulationHost host = simulation.getHost("Coordinator");
 			RuntimeFramework runtime = builder.build(host, simulation, listeners0, model,
 					new AlwaysRebroadcastingKnowledgeDataManager(model.getEnsembleDefinitions(),  null),
-					new CloningKnowledgeManagerFactory());
+					new CloningKnowledgeManagerFactory(), SecurityKeyManagerImpl.getInstance(), RatingsManagerImpl.getInstance());
 			runtime.start();
 		}
 		
