@@ -1,7 +1,16 @@
 package cz.cuni.mff.d3s.demo;
 
-public class Coordinates {
+import java.io.Serializable;
 
+import cz.cuni.mff.d3s.jdeeco.position.Position;
+
+public class Coordinates implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3768230178609887328L;
+	
 	private double x;
 	private double y;
 	
@@ -37,6 +46,10 @@ public class Coordinates {
 
 		// add
 		return new Coordinates(x + diff.x, y + diff.y);
+	}
+	
+	public Position toPosition() {
+		return new Position(x, y, 0);
 	}
 	
 	@Override

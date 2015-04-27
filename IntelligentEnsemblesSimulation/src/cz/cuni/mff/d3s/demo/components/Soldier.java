@@ -1,25 +1,27 @@
 package cz.cuni.mff.d3s.demo.components;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import cz.cuni.mff.d3s.deeco.annotations.Component;
 import cz.cuni.mff.d3s.deeco.annotations.In;
 import cz.cuni.mff.d3s.deeco.annotations.InOut;
+import cz.cuni.mff.d3s.deeco.annotations.Local;
 import cz.cuni.mff.d3s.deeco.annotations.PeriodicScheduling;
+import cz.cuni.mff.d3s.deeco.annotations.PlaysRole;
 import cz.cuni.mff.d3s.deeco.annotations.Process;
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;
 import cz.cuni.mff.d3s.deeco.task.ProcessContext;
 import cz.cuni.mff.d3s.demo.Coordinates;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.assignment.BasicAssignmentCalculator;
-import cz.cuni.mff.d3s.demo.assignment.OverallEnsembleCalculator;
 import cz.cuni.mff.d3s.demo.assignment.SoldierAssignmentCalculator;
 import cz.cuni.mff.d3s.demo.audit.SimulationController;
 import cz.cuni.mff.d3s.demo.uptime.ComponentUptimeDecider;
+import cz.cuni.mff.d3s.jdeeco.position.PositionPlugin;
 
 @Component
+@PlaysRole(SoldierRole.class)
 public class Soldier {
 	
 	public String id;
@@ -32,8 +34,11 @@ public class Soldier {
 	
 	public Boolean isOnline;
 	
-	//@Local
+	@Local
 	public ComponentUptimeDecider decider;
+	
+	@Local
+	public PositionPlugin positionPlugin;
 
 	public static SoldierAssignmentCalculator assignmentCalculator;
 	
@@ -41,7 +46,7 @@ public class Soldier {
 		assignmentCalculator = new BasicAssignmentCalculator();
 	}
 	
-	public Soldier(Integer id, boolean isOnline, ComponentUptimeDecider decider) {
+	public Soldier(Integer id, boolean isOnline, ComponentUptimeDecider decider, PositionPlugin positionPlugin) {
 		this.id = id.toString();
 		//this.role = SoldierRole.Unassigned;
 		this.ensembleId = -1;
@@ -54,7 +59,13 @@ public class Soldier {
 		
 		this.decider = decider;
 		
+		this.positionPlugin = positionPlugin;
+		
 		System.out.println("Created a soldier with id = " + this.id + "; coords = " + soldierData.coords);
+	}
+	
+	public SoldierData getSoldierData() {
+		return everyone.get(id);
 	}
 	
 	@Process

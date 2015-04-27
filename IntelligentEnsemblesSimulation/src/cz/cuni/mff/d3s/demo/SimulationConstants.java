@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.demo;
 
 public class SimulationConstants {
-	public static boolean IsCentralized = true;
+	public static boolean IsCentralized = false;
 	
 	public static long KnowledgeTimeout = 6000;
 	public static int SimulationLength = 120002;

@@ -11,11 +11,12 @@ import java.util.Random;
 
 import cz.cuni.mff.d3s.deeco.network.AbstractHost;
 import cz.cuni.mff.d3s.deeco.network.DataReceiver;
+import cz.cuni.mff.d3s.deeco.scheduler.Scheduler;
 import cz.cuni.mff.d3s.deeco.simulation.NetworkDataHandler;
-import cz.cuni.mff.d3s.deeco.simulation.TimerTaskListener;
+import cz.cuni.mff.d3s.deeco.task.TimerTaskListener;
 import cz.cuni.mff.d3s.deeco.simulation.scheduler.SimulationScheduler;
 import cz.cuni.mff.d3s.deeco.simulation.task.KnowledgeUpdateTask;
-import cz.cuni.mff.d3s.deeco.simulation.task.TimerTask;
+import cz.cuni.mff.d3s.deeco.task.TimerTask;
 
 /**
  * @author Michal Kit
@@ -82,7 +83,7 @@ public class RandomDelayedKnowledgeDataHandler extends NetworkDataHandler implem
 	}
 
 	@Override
-	public TimerTask getInitialTask(SimulationScheduler scheduler) {
+	public TimerTask getInitialTask(Scheduler scheduler) {
 		schedulers.put(scheduler.getHost().getHostId(), scheduler);
 		return null;
 	}

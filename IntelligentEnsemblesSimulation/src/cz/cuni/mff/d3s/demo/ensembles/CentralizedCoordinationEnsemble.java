@@ -11,6 +11,7 @@ import cz.cuni.mff.d3s.demo.components.SoldierRole;
 
 @Ensemble
 @PeriodicScheduling(period = 1000)
+//@MemberRole(SoldierRole.class)
 public class CentralizedCoordinationEnsemble {
 	
 	@Membership

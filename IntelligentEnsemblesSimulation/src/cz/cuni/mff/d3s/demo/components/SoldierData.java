@@ -1,11 +1,17 @@
 package cz.cuni.mff.d3s.demo.components;
 
+import java.io.Serializable;
 import java.util.Random;
 
 import cz.cuni.mff.d3s.demo.Coordinates;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
 
-public class SoldierData {
+public class SoldierData implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7753397990285711644L;
 
 	public long timestamp;
 	

@@ -2,17 +2,22 @@ package cz.cuni.mff.d3s.demo.ensembles;
 
 import java.util.Map;
 
+import cz.cuni.mff.d3s.deeco.annotations.CoordinatorRole;
 import cz.cuni.mff.d3s.deeco.annotations.Ensemble;
 import cz.cuni.mff.d3s.deeco.annotations.In;
 import cz.cuni.mff.d3s.deeco.annotations.InOut;
 import cz.cuni.mff.d3s.deeco.annotations.KnowledgeExchange;
+import cz.cuni.mff.d3s.deeco.annotations.MemberRole;
 import cz.cuni.mff.d3s.deeco.annotations.Membership;
 import cz.cuni.mff.d3s.deeco.annotations.PeriodicScheduling;
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
+import cz.cuni.mff.d3s.demo.components.SoldierRole;
 
 @Ensemble
 @PeriodicScheduling(period = 1000, offset = 500)
+//@CoordinatorRole(SoldierRole.class)
+//@MemberRole(SoldierRole.class)
 public class ReplicationCoordinationEnsemble {
 
 	@Membership

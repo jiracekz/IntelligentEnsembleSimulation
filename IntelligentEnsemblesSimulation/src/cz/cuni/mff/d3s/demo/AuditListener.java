@@ -3,13 +3,15 @@ package cz.cuni.mff.d3s.demo;
 import java.util.Collection;
 import java.util.HashMap;
 
+import cz.cuni.mff.d3s.deeco.DeecoProperties;
 import cz.cuni.mff.d3s.deeco.knowledge.KnowledgeManager;
 import cz.cuni.mff.d3s.deeco.knowledge.ReadOnlyKnowledgeManager;
+import cz.cuni.mff.d3s.deeco.network.PublisherTask;
 import cz.cuni.mff.d3s.deeco.runtime.RuntimeFramework;
-import cz.cuni.mff.d3s.deeco.simulation.TimerTaskListener;
-import cz.cuni.mff.d3s.deeco.simulation.scheduler.SimulationScheduler;
-import cz.cuni.mff.d3s.deeco.simulation.task.SimulationStepTask;
-import cz.cuni.mff.d3s.deeco.simulation.task.TimerTask;
+import cz.cuni.mff.d3s.deeco.task.CustomStepTask;
+import cz.cuni.mff.d3s.deeco.task.TimerTaskListener;
+import cz.cuni.mff.d3s.deeco.scheduler.Scheduler;
+import cz.cuni.mff.d3s.deeco.task.TimerTask;
 import cz.cuni.mff.d3s.demo.audit.SimulationController;
 
 public class AuditListener implements TimerTaskListener {
@@ -37,13 +39,13 @@ public class AuditListener implements TimerTaskListener {
 		
 		simulationController.doAudit(time, knowledgeManagers);
 		
-		SimulationStepTask task = (SimulationStepTask) triger;
+		CustomStepTask task = (CustomStepTask) triger;
 		task.scheduleNextExecutionAfter(SimulationConstants.SnapshotInterval);
 	}
 
 	@Override
-	public TimerTask getInitialTask(SimulationScheduler scheduler) {
-		return new SimulationStepTask(scheduler, this, 3);
+	public TimerTask getInitialTask(Scheduler scheduler) {
+		return new CustomStepTask(scheduler, this, 3);
 	}
 
 }
