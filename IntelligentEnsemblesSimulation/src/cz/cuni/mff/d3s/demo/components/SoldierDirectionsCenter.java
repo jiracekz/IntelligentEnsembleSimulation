@@ -1,18 +1,13 @@
 package cz.cuni.mff.d3s.demo.components;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import cz.cuni.mff.d3s.deeco.annotations.Component;
 import cz.cuni.mff.d3s.deeco.annotations.In;
 import cz.cuni.mff.d3s.deeco.annotations.InOut;
-import cz.cuni.mff.d3s.deeco.annotations.Out;
 import cz.cuni.mff.d3s.deeco.annotations.PeriodicScheduling;
 import cz.cuni.mff.d3s.deeco.annotations.Process;
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;
-import cz.cuni.mff.d3s.deeco.task.ProcessContext;
 import cz.cuni.mff.d3s.demo.assignment.OverallEnsembleCalculator;
 
 @Component

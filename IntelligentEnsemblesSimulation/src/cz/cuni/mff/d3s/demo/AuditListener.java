@@ -3,15 +3,12 @@ package cz.cuni.mff.d3s.demo;
 import java.util.Collection;
 import java.util.HashMap;
 
-import cz.cuni.mff.d3s.deeco.DeecoProperties;
 import cz.cuni.mff.d3s.deeco.knowledge.KnowledgeManager;
-import cz.cuni.mff.d3s.deeco.knowledge.ReadOnlyKnowledgeManager;
-import cz.cuni.mff.d3s.deeco.network.PublisherTask;
 import cz.cuni.mff.d3s.deeco.runtime.RuntimeFramework;
-import cz.cuni.mff.d3s.deeco.task.CustomStepTask;
-import cz.cuni.mff.d3s.deeco.task.TimerTaskListener;
 import cz.cuni.mff.d3s.deeco.scheduler.Scheduler;
+import cz.cuni.mff.d3s.deeco.task.CustomStepTask;
 import cz.cuni.mff.d3s.deeco.task.TimerTask;
+import cz.cuni.mff.d3s.deeco.task.TimerTaskListener;
 import cz.cuni.mff.d3s.demo.audit.SimulationController;
 
 public class AuditListener implements TimerTaskListener {

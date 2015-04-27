@@ -1,7 +1,10 @@
 package cz.cuni.mff.d3s.demo.ensembles;
 
-import cz.cuni.mff.d3s.deeco.annotations.*;
-import cz.cuni.mff.d3s.deeco.task.ParamHolder;
+import cz.cuni.mff.d3s.deeco.annotations.Ensemble;
+import cz.cuni.mff.d3s.deeco.annotations.In;
+import cz.cuni.mff.d3s.deeco.annotations.KnowledgeExchange;
+import cz.cuni.mff.d3s.deeco.annotations.Membership;
+import cz.cuni.mff.d3s.deeco.annotations.PeriodicScheduling;
 
 @Ensemble
 @PeriodicScheduling(period = 2000)

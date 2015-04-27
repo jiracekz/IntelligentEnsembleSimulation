@@ -15,7 +15,7 @@ import cz.cuni.mff.d3s.demo.components.SoldierDirectionsCenter;
 import cz.cuni.mff.d3s.demo.ensembles.CentralizedCoordinationEnsemble;
 import cz.cuni.mff.d3s.demo.ensembles.ReplicationCoordinationEnsemble;
 import cz.cuni.mff.d3s.demo.uptime.ComponentUptimeDecider;
-import cz.cuni.mff.d3s.demo.uptime.RandomUptimeDecider;
+import cz.cuni.mff.d3s.demo.uptime.NoEventUptimeDecider;
 import cz.cuni.mff.d3s.jdeeco.network.Network;
 import cz.cuni.mff.d3s.jdeeco.network.device.SimpleBroadcastDevice;
 import cz.cuni.mff.d3s.jdeeco.network.l2.strategy.KnowledgeInsertingStrategy;
@@ -41,7 +41,7 @@ public class SimpleLauncher {
 		realm.addPlugin(DefaultKnowledgePublisher.class);
 		realm.addPlugin(KnowledgeInsertingStrategy.class);
 		
-		ComponentUptimeDecider decider = new ComponentUptimeDecider(new RandomUptimeDecider(), SimulationConstants.IterationCount);	
+		ComponentUptimeDecider decider = new ComponentUptimeDecider(new NoEventUptimeDecider(), SimulationConstants.IterationCount);	
 		
 		Soldier[] soldiers = new Soldier[SimulationConstants.SoldierCount];
 		RuntimeFramework[] frameworks = new RuntimeFramework[SimulationConstants.SoldierCount];

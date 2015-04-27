@@ -2,7 +2,6 @@ package cz.cuni.mff.d3s.demo.audit.stats;
 
 import java.util.Map;
 
-import cz.cuni.mff.d3s.demo.Coordinates;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.audit.AuditData;
 

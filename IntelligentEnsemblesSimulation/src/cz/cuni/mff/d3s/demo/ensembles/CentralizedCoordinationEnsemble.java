@@ -1,13 +1,16 @@
 package cz.cuni.mff.d3s.demo.ensembles;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
-import cz.cuni.mff.d3s.deeco.annotations.*;
+import cz.cuni.mff.d3s.deeco.annotations.Ensemble;
+import cz.cuni.mff.d3s.deeco.annotations.In;
+import cz.cuni.mff.d3s.deeco.annotations.InOut;
+import cz.cuni.mff.d3s.deeco.annotations.KnowledgeExchange;
+import cz.cuni.mff.d3s.deeco.annotations.Membership;
+import cz.cuni.mff.d3s.deeco.annotations.PeriodicScheduling;
 import cz.cuni.mff.d3s.deeco.task.ParamHolder;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
-import cz.cuni.mff.d3s.demo.components.SoldierRole;
 
 @Ensemble
 @PeriodicScheduling(period = 1000)
