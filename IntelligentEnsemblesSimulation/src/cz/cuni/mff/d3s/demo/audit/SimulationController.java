@@ -12,6 +12,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import cz.cuni.mff.d3s.deeco.annotations.pathparser.ParseException;
+import cz.cuni.mff.d3s.deeco.annotations.pathparser.PathOrigin;
+import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessorException;
 import cz.cuni.mff.d3s.deeco.knowledge.KnowledgeManager;
 import cz.cuni.mff.d3s.deeco.knowledge.KnowledgeNotFoundException;
 import cz.cuni.mff.d3s.deeco.knowledge.ValueSet;
@@ -91,7 +94,10 @@ public class SimulationController {
 		try {
 			currentSoldierData = constructAuditData(knowledgeManagers);
 		} catch (KnowledgeNotFoundException e) {
-			System.err.println("Knowledge not found.");
+			System.err.println("SimulationController: Knowledge not found.");
+			return;
+		} catch (ParseException | AnnotationProcessorException e) {
+			System.err.println("SimulationController: Invalid knowledge.");
 			return;
 		}
 		
@@ -109,46 +115,20 @@ public class SimulationController {
 			System.err.println("IO error while saving stats.");
 		}
 	}
-		
-	private static class KnowledgePathBuilder {
-		private static final RuntimeMetadataFactory factory = RuntimeMetadataFactoryExt.eINSTANCE;
-		
-		public static KnowledgePath buildSimplePath(String pathString) {
-			KnowledgePath kp = factory.createKnowledgePath();
-			
-			for (String part: pathString.split("\\.")) {
-				PathNodeField pn = factory.createPathNodeField();
-				pn.setName(part);
-				kp.getNodes().add(pn);
-			}
-			
-			return kp;
-		}
-		
-		public static KnowledgePath createMapKey(String pathString, String index) {
-			KnowledgePath indexPath = buildSimplePath(index);
-			PathNodeMapKey mapKey = factory.createPathNodeMapKey();
-			mapKey.setKeyPath(indexPath);
-			
-			KnowledgePath kp = buildSimplePath(pathString);
-			kp.getNodes().add(mapKey);
-			return kp;
-		}
-	}
 	
 	// returns all components (even offline)
-	private Map<String, AuditData> constructAuditData(Map<String, KnowledgeManager> knowledgeManagers) throws KnowledgeNotFoundException {
+	private Map<String, AuditData> constructAuditData(Map<String, KnowledgeManager> knowledgeManagers) throws KnowledgeNotFoundException, ParseException, AnnotationProcessorException {
 		Map<String, AuditData> result = new HashMap<>();
 
 		for (Entry<String, KnowledgeManager> managerEntry : knowledgeManagers.entrySet()) {
 			KnowledgeManager manager = managerEntry.getValue();
-			// TODO refactor deeco and introduce method that would create a KnowledgePath from string,
-			//   then refactor this
-			KnowledgePath ensembleIdKnowledgePath = KnowledgePathBuilder.buildSimplePath("ensembleId");
-			KnowledgePath soldierDataKnowledgePath = KnowledgePathBuilder.createMapKey("everyone", "id");
-			KnowledgePath isOnlineKnowledgePath = KnowledgePathBuilder.buildSimplePath("isOnline");
+			KnowledgePath ensembleIdKnowledgePath = KnowledgePathHelper.createKnowledgePath("everyone.[id].ensembleId", PathOrigin.COMPONENT);
+			KnowledgePath soldierDataKnowledgePath = KnowledgePathHelper.createKnowledgePath("everyone.[id]", PathOrigin.COMPONENT);
+			KnowledgePath isOnlineKnowledgePath = KnowledgePathHelper.createKnowledgePath("isOnline", PathOrigin.COMPONENT);
 			
+			ensembleIdKnowledgePath = KnowledgePathHelper.getAbsolutePath(ensembleIdKnowledgePath, manager);
 			soldierDataKnowledgePath = KnowledgePathHelper.getAbsolutePath(soldierDataKnowledgePath, manager);
+			isOnlineKnowledgePath = KnowledgePathHelper.getAbsolutePath(isOnlineKnowledgePath, manager);
 			
 			ArrayList<KnowledgePath> knowledgePaths = new ArrayList<>();
 			knowledgePaths.add(ensembleIdKnowledgePath);

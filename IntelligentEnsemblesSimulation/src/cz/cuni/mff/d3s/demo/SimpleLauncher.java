@@ -14,6 +14,7 @@ import cz.cuni.mff.d3s.demo.components.Soldier;
 import cz.cuni.mff.d3s.demo.components.SoldierDirectionsCenter;
 import cz.cuni.mff.d3s.demo.ensembles.CentralizedCoordinationEnsemble;
 import cz.cuni.mff.d3s.demo.ensembles.ReplicationCoordinationEnsemble;
+import cz.cuni.mff.d3s.demo.ensembles.SquadEnsemble;
 import cz.cuni.mff.d3s.demo.uptime.ComponentUptimeDecider;
 import cz.cuni.mff.d3s.demo.uptime.NoEventUptimeDecider;
 import cz.cuni.mff.d3s.jdeeco.network.Network;
@@ -55,6 +56,7 @@ public class SimpleLauncher {
 			DEECoNode deeco1 = realm.createNode(position);
 			/* deploy components and ensembles */
 			deeco1.deployComponent(soldiers[i]);
+			deeco1.deployEnsemble(SquadEnsemble.class);
 			if (SimulationConstants.IsCentralized) {
 				deeco1.deployEnsemble(CentralizedCoordinationEnsemble.class);
 			} else {

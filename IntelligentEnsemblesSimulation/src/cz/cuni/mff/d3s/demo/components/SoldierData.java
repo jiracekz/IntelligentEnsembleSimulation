@@ -17,6 +17,9 @@ public class SoldierData implements Serializable {
 	
 	public Coordinates coords;
 	
+	public Integer ensembleId;
+	
+	
 	private static Random generator;
 	
 	static {
@@ -24,20 +27,24 @@ public class SoldierData implements Serializable {
 	}
 	
 	public SoldierData(double x, double y) {
+		this.ensembleId = -1;
 		this.coords = new Coordinates(x, y);
 	}
 	
 	public SoldierData(Coordinates coords) {
+		this.ensembleId = -1;
 		this.coords = coords;
 	}
 	
 	public SoldierData() {
-		this (generator.nextDouble() * SimulationConstants.FieldWidth, generator.nextDouble() * SimulationConstants.FieldHeight);
+		this (generator.nextDouble() * (SimulationConstants.FieldWidth - 200),
+				generator.nextDouble() * (SimulationConstants.FieldHeight - 200));
 	}
 	
 	public SoldierData clone() {
 		SoldierData copy = new SoldierData(coords);
 		copy.timestamp = timestamp;
+		copy.ensembleId = ensembleId;
 		return copy;
 	}
 	
@@ -48,6 +55,6 @@ public class SoldierData implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "{coords: " + coords + ", ts: " + timestamp + "}";
+		return "{coords: " + coords + ", ensemble: " + ensembleId + ", ts: " + timestamp + "}";
 	}	
 }

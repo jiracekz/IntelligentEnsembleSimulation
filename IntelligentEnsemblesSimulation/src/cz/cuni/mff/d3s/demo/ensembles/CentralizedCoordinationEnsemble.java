@@ -29,16 +29,16 @@ public class CentralizedCoordinationEnsemble {
 			@InOut("coord.allSoldiers") ParamHolder<HashMap<String, SoldierData>> allSoldiers,
 			@In("coord.ensembleIds") int[] ensembleIds,
 			@In("member.id") String memberId,
-			@In("member.everyone") Map<String, SoldierData> memberData,
+			@In("member.everyone.[member.id]") SoldierData memberData,
 			@In("member.isOnline") Boolean memberIsOnline,
-			@InOut("member.ensembleId") ParamHolder<Integer> memberEnsembleId) {
+			@InOut("member.everyone.[member.id].ensembleId") ParamHolder<Integer> memberEnsembleId) {
 		
 		// FIXME: why does @In("member.everyone.[member.id]") not work??
 		
 		if (!memberIsOnline) return;
 		
 		// member tells the coordinator its data
-		allSoldiers.value.put(memberId, memberData.get(memberId));
+		allSoldiers.value.put(memberId, memberData);
 		
 		// coordinator sets the member its settings
 		int id = Integer.parseInt(memberId);

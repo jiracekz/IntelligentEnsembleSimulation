@@ -7,7 +7,7 @@ import cz.cuni.mff.d3s.deeco.annotations.Role;
 @Role
 public class SoldierRole {
 	
-	public Integer ensembleId;
+	//public Integer ensembleId;
 		
 	public Map<String, SoldierData> everyone;
 	

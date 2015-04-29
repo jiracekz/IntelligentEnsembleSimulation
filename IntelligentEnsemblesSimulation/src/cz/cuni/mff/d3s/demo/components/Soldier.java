@@ -15,6 +15,7 @@ import cz.cuni.mff.d3s.deeco.task.ProcessContext;
 import cz.cuni.mff.d3s.demo.Coordinates;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.assignment.BasicAssignmentCalculator;
+import cz.cuni.mff.d3s.demo.assignment.ProbabilisticAssignmentCalculator;
 import cz.cuni.mff.d3s.demo.assignment.SoldierAssignmentCalculator;
 import cz.cuni.mff.d3s.demo.audit.SimulationController;
 import cz.cuni.mff.d3s.demo.uptime.ComponentUptimeDecider;
@@ -28,7 +29,7 @@ public class Soldier {
 	
 	//public SoldierRole role;
 	
-	public Integer ensembleId;
+	//public Integer ensembleId;
 		
 	public Map<String, SoldierData> everyone;
 	
@@ -43,13 +44,12 @@ public class Soldier {
 	public static SoldierAssignmentCalculator assignmentCalculator;
 	
 	static {
-		assignmentCalculator = new BasicAssignmentCalculator();
+		assignmentCalculator = new ProbabilisticAssignmentCalculator();
 	}
 	
 	public Soldier(Integer id, boolean isOnline, ComponentUptimeDecider decider, PositionPlugin positionPlugin) {
 		this.id = id.toString();
 		//this.role = SoldierRole.Unassigned;
-		this.ensembleId = -1;
 		
 		SoldierData soldierData = new SoldierData();
 		this.everyone = new HashMap<>();
@@ -73,7 +73,7 @@ public class Soldier {
 	public static void inferTeam(
 			@In("id") String id,
 			@In("everyone") Map<String, SoldierData> everyone,
-			@InOut("ensembleId") ParamHolder<Integer> ensembleId, 
+			@InOut("everyone.[id].ensembleId") ParamHolder<Integer> ensembleId, 
 			@In("isOnline") Boolean isOnline,
 			@In("everyone.[id]") SoldierData soldierData) {
 		
@@ -85,7 +85,7 @@ public class Soldier {
 			return;
 		}
 				
-		ensembleId.value = assignmentCalculator.AssignEnsemble(id, soldierData, everyone);
+		ensembleId.value = assignmentCalculator.assignEnsemble(id, soldierData, everyone);
 	}
 
 
@@ -95,7 +95,7 @@ public class Soldier {
 			@In("id") String id, 
 			@In("decider") ComponentUptimeDecider decider, 
 			@InOut("isOnline") ParamHolder<Boolean> isOnline,
-			@InOut("ensembleId") ParamHolder<Integer> ensembleId) {
+			@InOut("everyone.[id].ensembleId") ParamHolder<Integer> ensembleId) {
 		
 		boolean newState = decider.shouldBeOnline(Integer.parseInt(id), ProcessContext.getTimeProvider().getCurrentMilliseconds());
 		
@@ -114,7 +114,7 @@ public class Soldier {
 	public static void performDuties(
 			@In("id") String id,
 			@InOut("everyone.[id]") ParamHolder<SoldierData> soldierData,
-			@In("ensembleId") Integer ensembleId,
+			@In("everyone.[id].ensembleId") Integer ensembleId,
 			@In("isOnline") Boolean isOnline) {
 		
 		if (!isOnline) {

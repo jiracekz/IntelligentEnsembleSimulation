@@ -6,5 +6,5 @@ import cz.cuni.mff.d3s.demo.components.SoldierData;
 
 
 public interface SoldierAssignmentCalculator {
-	int AssignEnsemble(String id, SoldierData soldierData, Map<String, SoldierData> everyone);
+	int assignEnsemble(String id, SoldierData soldierData, Map<String, SoldierData> everyone);
 }
