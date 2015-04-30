@@ -15,8 +15,10 @@ import cz.cuni.mff.d3s.deeco.task.ProcessContext;
 import cz.cuni.mff.d3s.demo.Coordinates;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.assignment.BasicAssignmentCalculator;
+import cz.cuni.mff.d3s.demo.assignment.OverallEnsembleCalculator;
 import cz.cuni.mff.d3s.demo.assignment.ProbabilisticAssignmentCalculator;
 import cz.cuni.mff.d3s.demo.assignment.SoldierAssignmentCalculator;
+import cz.cuni.mff.d3s.demo.assignment.SoldierAssignmentMode;
 import cz.cuni.mff.d3s.demo.audit.SimulationController;
 import cz.cuni.mff.d3s.demo.uptime.ComponentUptimeDecider;
 import cz.cuni.mff.d3s.jdeeco.position.PositionPlugin;
@@ -24,7 +26,7 @@ import cz.cuni.mff.d3s.jdeeco.position.PositionPlugin;
 @Component
 @PlaysRole(SoldierRole.class)
 public class Soldier {
-	
+		
 	public String id;
 	
 	//public SoldierRole role;
@@ -34,6 +36,10 @@ public class Soldier {
 	public Map<String, SoldierData> everyone;
 	
 	public Boolean isOnline;
+	
+	public Integer desiredEnsembleId;
+	public Boolean desireResult;
+	public Long desireTimestamp;
 	
 	@Local
 	public ComponentUptimeDecider decider;
@@ -56,6 +62,8 @@ public class Soldier {
 		this.everyone.put(this.id, soldierData);
 		
 		this.isOnline = isOnline;
+		this.desiredEnsembleId = -1;
+		this.desireResult = false; // so that we choose new ensemble in the beginning
 		
 		this.decider = decider;
 		
@@ -74,6 +82,9 @@ public class Soldier {
 			@In("id") String id,
 			@In("everyone") Map<String, SoldierData> everyone,
 			@InOut("everyone.[id].ensembleId") ParamHolder<Integer> ensembleId, 
+			@InOut("desiredEnsembleId") ParamHolder<Integer> desiredEnsembleId,
+			@InOut("desireResult") ParamHolder<Boolean> desireResult,
+			@InOut("desireTimestamp") ParamHolder<Long> desireTimestamp,
 			@In("isOnline") Boolean isOnline,
 			@In("everyone.[id]") SoldierData soldierData) {
 		
@@ -85,7 +96,45 @@ public class Soldier {
 			return;
 		}
 				
-		ensembleId.value = assignmentCalculator.assignEnsemble(id, soldierData, everyone);
+		switch (SimulationConstants.AssignmentMode) {
+		case AssignImmediately:
+			ensembleId.value = assignmentCalculator.assignEnsemble(id, soldierData, everyone);
+			break;
+			
+		case AskAnyone:
+			if (desireResult.value != null && desireResult.value.booleanValue()) {
+				// our desired ensemble was approved, go for it
+				ensembleId.value = desiredEnsembleId.value;
+				desireResult.value = null;
+				desireTimestamp.value = null;
+			} else if (desireResult.value != null && !desireResult.value.booleanValue()) {
+				// our desired ensemble was rejected, find another one
+				desiredEnsembleId.value = assignmentCalculator.assignEnsemble(id, soldierData, everyone);				
+				desireResult.value = null;
+				desireTimestamp.value = ProcessContext.getTimeProvider().getCurrentMilliseconds();
+				if (desiredEnsembleId.value == ensembleId.value) {
+					desiredEnsembleId.value = null;
+					desireTimestamp.value = null;
+				}
+			} else if (desireTimestamp.value == null) {
+				// we had no desire, let's verify whether we need a new ensemble
+				desiredEnsembleId.value = assignmentCalculator.assignEnsemble(id, soldierData, everyone);
+				if (desiredEnsembleId.value != ensembleId.value) {
+					desireTimestamp.value = ProcessContext.getTimeProvider().getCurrentMilliseconds();
+				} else {
+					desiredEnsembleId.value = null;
+				}
+			} else if (desireTimestamp.value < ProcessContext.getTimeProvider().getCurrentMilliseconds() - SoldierAssignmentMode.AskTimeout) {
+				// we had a desire, but noone responded
+				ensembleId.value = desiredEnsembleId.value;
+				desireResult.value = null;
+				desireTimestamp.value = null;
+			}
+			
+			break;
+		case AskCoordinator:
+			break;
+		}
 	}
 
 
@@ -126,14 +175,16 @@ public class Soldier {
 		
 		if (ensembleId < 0)
 			return;
-				
-		Coordinates target = SimulationConstants.TargetCoordinates[ensembleId];
-		if (soldierData.value.coords.getDistanceTo(target) > SimulationConstants.MovementPerIteration) {
-			soldierData.value.coords = soldierData.value.coords.moveVectorTo(target, SimulationConstants.MovementPerIteration);
-			SimulationController.totalMoves += SimulationConstants.MovementPerIteration;
-		} else {
-			SimulationController.totalMoves += target.getDistanceTo(soldierData.value.coords);		
-			soldierData.value.coords = target;
+			
+		if (SimulationConstants.MoveSoldiers) {
+			Coordinates target = SimulationConstants.TargetCoordinates[ensembleId];
+			if (soldierData.value.coords.getDistanceTo(target) > SimulationConstants.MovementPerIteration) {
+				soldierData.value.coords = soldierData.value.coords.moveVectorTo(target, SimulationConstants.MovementPerIteration);
+				SimulationController.totalMoves += SimulationConstants.MovementPerIteration;
+			} else {
+				SimulationController.totalMoves += target.getDistanceTo(soldierData.value.coords);		
+				soldierData.value.coords = target;
+			}
 		}
 	}
 	

@@ -32,9 +32,7 @@ public class ReplicationCoordinationEnsemble {
 	@InOut("member.everyone") ParamHolder<Map<String, SoldierData>> memberList,
 	@In("coord.isOnline") Boolean coordIsOnline,
 	@In("member.isOnline") Boolean memberIsOnline ) {
-		
-		// FIXME: why does @In("coord.everyone.[coord.id]") not work??
-		
+				
 		if (!coordIsOnline || !memberIsOnline) return;
 		
 		if (!memberList.value.containsKey(coordId)) {

@@ -10,6 +10,16 @@ import cz.cuni.mff.d3s.demo.Coordinates;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
 
+/*
+ * See Documents/DEECo/protokol.txt for more detailed information about the exchange protocol.
+ */
+
+enum ReassignmentResult {
+	MustStay, // the component must stay in the current ensemble, else hard conditions could be broken
+	CanStay, // the component can stay in the ensemble, but can also leave without breaking hard conditions
+	CannotStay // the component cannot stay in the ensemble without the hard conditions being broken
+}
+
 public class ProbabilisticAssignmentCalculator implements
 		SoldierAssignmentCalculator {
 	
@@ -23,11 +33,13 @@ public class ProbabilisticAssignmentCalculator implements
 		generator = new Random(SimulationConstants.RandomSeed);
 	}
 	
-	private static double ensembleMembershipCost(int ensembleId, SoldierData soldierData) {
+	public static double ensembleMembershipCost(int ensembleId, SoldierData soldierData) {
+		if (ensembleId == -1)
+			return 100000;
 		return soldierData.coords.getDistanceTo(SimulationConstants.TargetCoordinates[ensembleId]);
 	}
 	
-	private static int ensembleSize(int ensembleId, Map<String, SoldierData> everyone) {
+	public static int ensembleSize(int ensembleId, Map<String, SoldierData> everyone) {
 		int size = 0;
 		for (SoldierData soldier : everyone.values()) {
 			if (soldier.ensembleId.intValue() == ensembleId) {
@@ -54,10 +66,26 @@ public class ProbabilisticAssignmentCalculator implements
 			return 0;
 		
 		int result = findBestEnsembleProbabilistic(soldierData);
-		if (!keepEnsemble(soldierData, everyone)
-				|| (ensembleMembershipCost(result, soldierData) < ensembleMembershipCost(soldierData.ensembleId, soldierData)
-						&& ensembleSize(soldierData.ensembleId, everyone) > SimulationConstants.MinEnsembleSize)
-						&& ensembleSize(result, everyone) < SimulationConstants.MaxEnsembleSize) {
+		if (result == soldierData.ensembleId) {
+			// no change, nothing to do
+			return result;
+		}
+		
+		// here the result is different than the current ensemble
+		
+		ReassignmentResult reassignment = keepEnsemble(soldierData, everyone);
+		double costInCurrentEnsemble = ensembleMembershipCost(soldierData.ensembleId, soldierData);
+		double costInNewEnsemble = ensembleMembershipCost(result, soldierData);
+		int componentCountInNewEnsemble = ensembleSize(result, everyone);
+		
+		boolean canJoinNewEnsemble = (componentCountInNewEnsemble < SimulationConstants.MaxEnsembleSize);
+		boolean randomChangeEnsemble = (generator.nextDouble() > 1.0 * EnsembleCount / SimulationConstants.SoldierCount);
+		boolean switchToNewEnsemble = (reassignment == ReassignmentResult.CannotStay);
+		switchToNewEnsemble |= (reassignment == ReassignmentResult.CanStay) && randomChangeEnsemble
+				&& (componentCountInNewEnsemble < SimulationConstants.MinEnsembleSize
+						|| canJoinNewEnsemble && costInNewEnsemble < costInCurrentEnsemble - 150);
+		
+		if (switchToNewEnsemble) {
 			return result;
 		} else {
 			return soldierData.ensembleId;
@@ -68,7 +96,7 @@ public class ProbabilisticAssignmentCalculator implements
 		double[] distances = new double[EnsembleCount];
 		double distanceSum = 0;
 		for (int i = 0; i < EnsembleCount; i++) {
-			distances[i] = 1.0 / ensembleMembershipCost(i, soldierData);
+			distances[i] = 1.0 / (ensembleMembershipCost(i, soldierData) + 10);
 			distanceSum += distances[i];
 		}
 		
@@ -87,18 +115,16 @@ public class ProbabilisticAssignmentCalculator implements
 			}
 		}
 		
-		// this should not happen, probabilityRangeEnd should reach 1.0
 		assert false;
 		return EnsembleCount - 1;
 	}
 	
-	// True if there is no need to change ensemble (the current one does not violate hard conditions).
-	// In case the hard conditions are violated there still may be no need to abandon the ensemble,
-	// the result is based on the position of this soldier and on the other components (from
-	// the same ensemble) positions.
-	private boolean keepEnsemble(SoldierData soldierData, Map<String, SoldierData> everyone) {
+	/*
+	 * @see ReassignmentResult
+	 */
+	private ReassignmentResult keepEnsemble(SoldierData soldierData, Map<String, SoldierData> everyone) {
 		if (soldierData.ensembleId == -1)
-			return false;
+			return ReassignmentResult.CannotStay;
 		
 		Coordinates myTarget = SimulationConstants.TargetCoordinates[soldierData.ensembleId];
 		
@@ -109,22 +135,29 @@ public class ProbabilisticAssignmentCalculator implements
 			}
 		}
 		
-		if (distances.size() <= SimulationConstants.MaxEnsembleSize) {
-			// it's OK, the ensemble is not overpopulated
-			return true;
+		if (distances.size() <= SimulationConstants.MinEnsembleSize) {
+			// it's OK, the ensemble is at the minimum size level
+			return ReassignmentResult.MustStay;
 		}
 		
 		Collections.sort(distances);
 		double myDistance = soldierData.coords.getDistanceTo(myTarget);
-		for (int i = 0; i < SimulationConstants.MaxEnsembleSize; i++) {
+		for (int i = 0; i < SimulationConstants.MaxEnsembleSize && i < distances.size(); i++) {
 			if (myDistance < distances.get(i)) {
 				// it's OK, we're close enough, someone another should go away
-				return true;
+				if (i < SimulationConstants.MinEnsembleSize)
+					return ReassignmentResult.MustStay;
+				else
+					return ReassignmentResult.CanStay;
 			}
 		}
 		
-		// the ensemble is overpopulated and we are too far
-		return false;
+		if (distances.size() > SimulationConstants.MaxEnsembleSize) {
+			// the ensemble is overpopulated and we are too far
+			return ReassignmentResult.CannotStay;
+		} else {
+			return ReassignmentResult.CanStay;
+		}
 	}
 
 }

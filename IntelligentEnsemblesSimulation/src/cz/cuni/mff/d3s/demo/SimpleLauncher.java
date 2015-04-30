@@ -9,9 +9,11 @@ import cz.cuni.mff.d3s.deeco.runtime.DEECoNode;
 import cz.cuni.mff.d3s.deeco.runtime.RuntimeFramework;
 import cz.cuni.mff.d3s.deeco.timer.DiscreteEventTimer;
 import cz.cuni.mff.d3s.deeco.timer.SimulationTimer;
+import cz.cuni.mff.d3s.demo.assignment.SoldierAssignmentMode;
 import cz.cuni.mff.d3s.demo.audit.SimulationController;
 import cz.cuni.mff.d3s.demo.components.Soldier;
 import cz.cuni.mff.d3s.demo.components.SoldierDirectionsCenter;
+import cz.cuni.mff.d3s.demo.ensembles.CandidateEnsemble;
 import cz.cuni.mff.d3s.demo.ensembles.CentralizedCoordinationEnsemble;
 import cz.cuni.mff.d3s.demo.ensembles.ReplicationCoordinationEnsemble;
 import cz.cuni.mff.d3s.demo.ensembles.SquadEnsemble;
@@ -37,7 +39,7 @@ public class SimpleLauncher {
 		/* create main application container */
 		SimulationTimer simulationTimer = new DiscreteEventTimer(); // also "new WallTimeSchedulerNotifier()"
 		DEECoSimulation realm = new DEECoSimulation(simulationTimer);
-		realm.addPlugin(new SimpleBroadcastDevice(1500, 500, Integer.MAX_VALUE));
+		realm.addPlugin(new SimpleBroadcastDevice(1000, 1000, Integer.MAX_VALUE));
 		realm.addPlugin(Network.class);
 		realm.addPlugin(DefaultKnowledgePublisher.class);
 		realm.addPlugin(KnowledgeInsertingStrategy.class);
@@ -56,11 +58,14 @@ public class SimpleLauncher {
 			DEECoNode deeco1 = realm.createNode(position);
 			/* deploy components and ensembles */
 			deeco1.deployComponent(soldiers[i]);
-			deeco1.deployEnsemble(SquadEnsemble.class);
 			if (SimulationConstants.IsCentralized) {
 				deeco1.deployEnsemble(CentralizedCoordinationEnsemble.class);
 			} else {
 				deeco1.deployEnsemble(ReplicationCoordinationEnsemble.class);
+				deeco1.deployEnsemble(SquadEnsemble.class);
+				if (SimulationConstants.AssignmentMode != SoldierAssignmentMode.AssignImmediately) {
+					deeco1.deployEnsemble(CandidateEnsemble.class);
+				}
 			}
 			
 			frameworks[i] = deeco1.getRuntimeFramework();

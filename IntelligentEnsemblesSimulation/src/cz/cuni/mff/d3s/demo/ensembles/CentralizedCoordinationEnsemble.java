@@ -33,8 +33,6 @@ public class CentralizedCoordinationEnsemble {
 			@In("member.isOnline") Boolean memberIsOnline,
 			@InOut("member.everyone.[member.id].ensembleId") ParamHolder<Integer> memberEnsembleId) {
 		
-		// FIXME: why does @In("member.everyone.[member.id]") not work??
-		
 		if (!memberIsOnline) return;
 		
 		// member tells the coordinator its data
