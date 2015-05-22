@@ -5,7 +5,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -19,10 +22,6 @@ import cz.cuni.mff.d3s.deeco.knowledge.KnowledgeManager;
 import cz.cuni.mff.d3s.deeco.knowledge.KnowledgeNotFoundException;
 import cz.cuni.mff.d3s.deeco.knowledge.ValueSet;
 import cz.cuni.mff.d3s.deeco.model.runtime.api.KnowledgePath;
-import cz.cuni.mff.d3s.deeco.model.runtime.api.PathNodeField;
-import cz.cuni.mff.d3s.deeco.model.runtime.api.PathNodeMapKey;
-import cz.cuni.mff.d3s.deeco.model.runtime.custom.RuntimeMetadataFactoryExt;
-import cz.cuni.mff.d3s.deeco.model.runtime.meta.RuntimeMetadataFactory;
 import cz.cuni.mff.d3s.deeco.task.KnowledgePathHelper;
 import cz.cuni.mff.d3s.demo.Coordinates;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
@@ -125,20 +124,24 @@ public class SimulationController {
 			KnowledgePath ensembleIdKnowledgePath = KnowledgePathHelper.createKnowledgePath("everyone.[id].ensembleId", PathOrigin.COMPONENT);
 			KnowledgePath soldierDataKnowledgePath = KnowledgePathHelper.createKnowledgePath("everyone.[id]", PathOrigin.COMPONENT);
 			KnowledgePath isOnlineKnowledgePath = KnowledgePathHelper.createKnowledgePath("isOnline", PathOrigin.COMPONENT);
+			KnowledgePath everyoneKnowledgePath = KnowledgePathHelper.createKnowledgePath("everyone", PathOrigin.COMPONENT);
 			
 			ensembleIdKnowledgePath = KnowledgePathHelper.getAbsolutePath(ensembleIdKnowledgePath, manager);
 			soldierDataKnowledgePath = KnowledgePathHelper.getAbsolutePath(soldierDataKnowledgePath, manager);
 			isOnlineKnowledgePath = KnowledgePathHelper.getAbsolutePath(isOnlineKnowledgePath, manager);
+			everyoneKnowledgePath = KnowledgePathHelper.getAbsolutePath(everyoneKnowledgePath, manager);
 			
 			ArrayList<KnowledgePath> knowledgePaths = new ArrayList<>();
 			knowledgePaths.add(ensembleIdKnowledgePath);
 			knowledgePaths.add(soldierDataKnowledgePath);
 			knowledgePaths.add(isOnlineKnowledgePath);
+			knowledgePaths.add(everyoneKnowledgePath);
 			ValueSet valueSet = manager.get(knowledgePaths);
 			AuditData auditData = new AuditData();
 			auditData.soldierData = (SoldierData)valueSet.getValue(soldierDataKnowledgePath);
 			auditData.ensembleId = (Integer)valueSet.getValue(ensembleIdKnowledgePath);
 			auditData.isOnline = (Boolean)valueSet.getValue(isOnlineKnowledgePath);
+			auditData.knowsAbout = ((Map<String, SoldierData>)valueSet.getValue(everyoneKnowledgePath)).keySet();
 			result.put(managerEntry.getKey(), auditData);
 		}
 		
@@ -152,8 +155,16 @@ public class SimulationController {
 	private void printState(Map<String, AuditData> soldierData) {
 		for (Entry<String, AuditData> soldierEntry : soldierData.entrySet()) {
 			if (soldierEntry.getValue().isOnline) {
-				System.out.printf("Soldier #%s: group = %d, coords = %s\n", soldierEntry.getKey(), soldierEntry.getValue().ensembleId,
-						soldierEntry.getValue().soldierData.coords.toString());
+				ArrayList<String> knowsAbout = new ArrayList<String>(soldierEntry.getValue().knowsAbout);
+				knowsAbout.sort(new Comparator<String>() {
+					@Override
+					public int compare(String o1, String o2) {
+						return Integer.compare(Integer.parseInt(o1), Integer.parseInt(o2));
+					}
+				});
+				
+				System.out.printf("Soldier #%s: group = %d, coords = %s, knows %s\n", soldierEntry.getKey(), soldierEntry.getValue().ensembleId,
+						soldierEntry.getValue().soldierData.coords.toString(), knowsAbout.toString());
 			} else {
 				System.out.printf("Soldier #%s: offline\n", soldierEntry.getKey());
 			}

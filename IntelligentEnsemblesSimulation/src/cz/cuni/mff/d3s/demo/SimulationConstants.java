@@ -5,11 +5,11 @@ import cz.cuni.mff.d3s.demo.assignment.SoldierAssignmentMode;
 public class SimulationConstants {
 	public static boolean IsCentralized = false;
 	
-	public static long KnowledgeTimeout = 10000;
+	public static long KnowledgeTimeout = Integer.MAX_VALUE;
 	public static int SimulationLength = 120002;
 	public static int SnapshotInterval = 1000;
 	public static int IterationCount = SimulationConstants.SimulationLength / SimulationConstants.SnapshotInterval;
-	public static int SoldierCount = 60;
+	public static int SoldierCount = 16;
 	public static float SoldierDownProbability = 0.2f;
 	public static float SoldierUpProbability = 0.0f;
 	

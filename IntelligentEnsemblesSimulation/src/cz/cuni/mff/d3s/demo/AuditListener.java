@@ -40,7 +40,6 @@ public class AuditListener implements TimerTaskListener {
 		task.scheduleNextExecutionAfter(SimulationConstants.SnapshotInterval);
 	}
 
-	@Override
 	public TimerTask getInitialTask(Scheduler scheduler) {
 		return new CustomStepTask(scheduler, this, 3);
 	}

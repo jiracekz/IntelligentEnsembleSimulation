@@ -24,12 +24,19 @@ import cz.cuni.mff.d3s.jdeeco.network.Network;
 import cz.cuni.mff.d3s.jdeeco.network.device.SimpleBroadcastDevice;
 import cz.cuni.mff.d3s.jdeeco.network.l2.strategy.KnowledgeInsertingStrategy;
 import cz.cuni.mff.d3s.jdeeco.network.l2.strategy.RebroadcastStrategy;
+import cz.cuni.mff.d3s.jdeeco.network.omnet.OMNeTBroadcastDevice;
+import cz.cuni.mff.d3s.jdeeco.network.omnet.OMNeTSimulation;
 import cz.cuni.mff.d3s.jdeeco.position.PositionPlugin;
 import cz.cuni.mff.d3s.jdeeco.publishing.DefaultKnowledgePublisher;
+import demo.broadcast.ConvoyEnsemble;
+import demo.broadcast.Follower;
+import demo.broadcast.Leader;
 
-public class SimpleLauncher {
+public class OmnetLauncher {
 	
 	public static void main(String[] args) throws AnnotationProcessorException, KeyStoreException, InstantiationException, IllegalAccessException, DEECoException {
+		
+		Locale.setDefault(Locale.US);
 		
 		// for bad times
 		//System.out.println(System.getProperty("java.class.path"));
@@ -39,27 +46,32 @@ public class SimpleLauncher {
 		System.out.println("Preparing simulation");		
 		
 		/* create main application container */
-		SimulationTimer simulationTimer = new DiscreteEventTimer(); // also "new WallTimeSchedulerNotifier()"
-		DEECoSimulation realm = new DEECoSimulation(simulationTimer);
-		realm.addPlugin(new SimpleBroadcastDevice(1000, 1000, 250, 4096));
+	//	SimulationTimer simulationTimer = new DiscreteEventTimer(); // also "new WallTimeSchedulerNotifier()"
+		
+		OMNeTSimulation omnet = new OMNeTSimulation(); 
+		
+		DEECoSimulation realm = new DEECoSimulation(omnet.getTimer());
+		//realm.addPlugin(new SimpleBroadcastDevice(1000, 1000, Integer.MAX_VALUE, 4096));
+		//realm.addPlugin(OMNeTBroadcastDevice.class);
 		realm.addPlugin(Network.class);
 		realm.addPlugin(DefaultKnowledgePublisher.class);
 		realm.addPlugin(RebroadcastStrategy.class);
 		realm.addPlugin(KnowledgeInsertingStrategy.class);
+		realm.addPlugin(omnet);
 		
 		ComponentUptimeDecider decider = new ComponentUptimeDecider(new NoEventUptimeDecider(), SimulationConstants.IterationCount);	
-		
+	
 		Soldier[] soldiers = new Soldier[SimulationConstants.SoldierCount];
 		RuntimeFramework[] frameworks = new RuntimeFramework[SimulationConstants.SoldierCount];
 		for (int i = 0; i < SimulationConstants.SoldierCount; i++) {		
 			PositionPlugin position = new PositionPlugin(0, 0);
-			soldiers[i] = new Soldier(i, true, decider, position);
+			soldiers[i] = new Soldier(i, true, decider, position); 
 			position.setStaticPosition(soldiers[i].getSoldierData().coords.toPosition());
 			decider.setInitStateFor(i, soldiers[i].isOnline);
 			
-			/* create first deeco node */
-			DEECoNode deeco1 = realm.createNode(position);
-			/* deploy components and ensembles */
+			// create first deeco node
+			DEECoNode deeco1 = realm.createNode(new OMNeTBroadcastDevice(), position);
+			// deploy components and ensembles
 			deeco1.deployComponent(soldiers[i]);
 			if (SimulationConstants.IsCentralized) {
 				deeco1.deployEnsemble(CentralizedCoordinationEnsemble.class);
@@ -72,22 +84,23 @@ public class SimpleLauncher {
 			}
 			
 			frameworks[i] = deeco1.getRuntimeFramework();
+			
 		}
 
 		decider.generateUptimeData();
-		
-		DEECoNode diagnosticNode = realm.createNode(new PositionPlugin(0, 0));
+	
+		DEECoNode diagnosticNode = realm.createNode(new OMNeTBroadcastDevice(), new PositionPlugin(0, 0));
 		diagnosticNode.getRuntimeFramework().getScheduler().addTask(new AuditListener(controller, frameworks)
 				.getInitialTask(diagnosticNode.getRuntimeFramework().getScheduler()));
-		
+	
 		
 		if (SimulationConstants.IsCentralized) {
 			// add directions center
-			DEECoNode centralNode = realm.createNode(new PositionPlugin(SimulationConstants.FieldWidth / 2, SimulationConstants.FieldHeight / 2));
+			DEECoNode centralNode = realm.createNode(new OMNeTBroadcastDevice(), new PositionPlugin(SimulationConstants.FieldWidth / 2, SimulationConstants.FieldHeight / 2));
 			centralNode.deployComponent(new SoldierDirectionsCenter(SimulationConstants.SoldierCount));
 			centralNode.deployEnsemble(CentralizedCoordinationEnsemble.class);
 		}
-		
+	
 		System.out.println("Run the simulation");
 		//Run the simulation
 		realm.start(SimulationConstants.SimulationLength);

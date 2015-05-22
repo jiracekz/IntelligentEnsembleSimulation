@@ -12,7 +12,7 @@ import cz.cuni.mff.d3s.deeco.task.ParamHolder;
 import cz.cuni.mff.d3s.demo.components.SoldierData;
 
 @Ensemble
-@PeriodicScheduling(period = 5000, offset = 500)
+@PeriodicScheduling(period = 1000, offset = 500)
 //@CoordinatorRole(SoldierRole.class)
 //@MemberRole(SoldierRole.class)
 public class ReplicationCoordinationEnsemble {
