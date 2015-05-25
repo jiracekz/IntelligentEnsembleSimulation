@@ -22,6 +22,7 @@ import cz.cuni.mff.d3s.demo.uptime.ComponentUptimeDecider;
 import cz.cuni.mff.d3s.demo.uptime.NoEventUptimeDecider;
 import cz.cuni.mff.d3s.jdeeco.network.Network;
 import cz.cuni.mff.d3s.jdeeco.network.device.SimpleBroadcastDevice;
+import cz.cuni.mff.d3s.jdeeco.network.l2.L2PacketType;
 import cz.cuni.mff.d3s.jdeeco.network.l2.strategy.KnowledgeInsertingStrategy;
 import cz.cuni.mff.d3s.jdeeco.network.l2.strategy.RebroadcastStrategy;
 import cz.cuni.mff.d3s.jdeeco.network.omnet.OMNeTBroadcastDevice;
@@ -71,6 +72,7 @@ public class OmnetLauncher {
 			
 			// create first deeco node
 			DEECoNode deeco1 = realm.createNode(new OMNeTBroadcastDevice(), position);
+			deeco1.getPluginInstance(Network.class).getL2().getMarshallers().registerMarshaller(L2PacketType.KNOWLEDGE, new SoldierDataMarshaller());
 			// deploy components and ensembles
 			deeco1.deployComponent(soldiers[i]);
 			if (SimulationConstants.IsCentralized) {

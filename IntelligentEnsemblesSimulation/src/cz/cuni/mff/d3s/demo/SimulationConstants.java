@@ -9,7 +9,7 @@ public class SimulationConstants {
 	public static int SimulationLength = 120002;
 	public static int SnapshotInterval = 1000;
 	public static int IterationCount = SimulationConstants.SimulationLength / SimulationConstants.SnapshotInterval;
-	public static int SoldierCount = 16;
+	public static int SoldierCount = 44;
 	public static float SoldierDownProbability = 0.2f;
 	public static float SoldierUpProbability = 0.0f;
 	
