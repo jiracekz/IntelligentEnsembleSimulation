@@ -26,6 +26,7 @@ import cz.cuni.mff.d3s.deeco.task.KnowledgePathHelper;
 import cz.cuni.mff.d3s.demo.Coordinates;
 import cz.cuni.mff.d3s.demo.SimulationConstants;
 import cz.cuni.mff.d3s.demo.audit.stats.NumOfGroupsCompleteStatistic;
+import cz.cuni.mff.d3s.demo.audit.stats.OverallCostStatistic;
 import cz.cuni.mff.d3s.demo.audit.stats.Statistic;
 import cz.cuni.mff.d3s.demo.audit.stats.SumDistanceToTargetStatistic;
 import cz.cuni.mff.d3s.demo.audit.stats.TotalMovesStatistic;
@@ -45,10 +46,11 @@ public class SimulationController {
 	
 	static {
 		statsList = new ArrayList<Statistic>();
-		statsList.add(new TotalMovesStatistic());
-		statsList.add(new SumDistanceToTargetStatistic());
-		statsList.add(new WellPlacedSoldiersStatistic());
-		statsList.add(new NumOfGroupsCompleteStatistic());
+		//statsList.add(new TotalMovesStatistic());
+		//statsList.add(new SumDistanceToTargetStatistic());
+		//statsList.add(new WellPlacedSoldiersStatistic());
+		//statsList.add(new NumOfGroupsCompleteStatistic());
+		statsList.add(new OverallCostStatistic());
 
 	}
 	

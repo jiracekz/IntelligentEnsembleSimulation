@@ -50,8 +50,8 @@ public class Soldier {
 	public static SoldierAssignmentCalculator assignmentCalculator;
 	
 	static {
-		//assignmentCalculator = new ProbabilisticAssignmentCalculator();
-		assignmentCalculator = new BasicAssignmentCalculator();
+		assignmentCalculator = new ProbabilisticAssignmentCalculator();
+		//assignmentCalculator = new BasicAssignmentCalculator();
 	}
 	
 	public Soldier(Integer id, boolean isOnline, ComponentUptimeDecider decider, PositionPlugin positionPlugin) {
