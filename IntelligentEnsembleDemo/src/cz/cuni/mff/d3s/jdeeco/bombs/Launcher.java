@@ -1,8 +1,6 @@
 package cz.cuni.mff.d3s.jdeeco.bombs;
 
 import cz.cuni.mff.d3s.deeco.annotations.processor.AnnotationProcessorException;
-import cz.cuni.mff.d3s.deeco.demo.roles.BoardingEnsemble;
-import cz.cuni.mff.d3s.deeco.demo.roles.Car;
 import cz.cuni.mff.d3s.deeco.runners.DEECoSimulation;
 import cz.cuni.mff.d3s.deeco.runtime.DEECoException;
 import cz.cuni.mff.d3s.deeco.runtime.DEECoNode;
