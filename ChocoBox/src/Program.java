@@ -41,7 +41,7 @@ public class Program {
 		
 		// Input configuration - available components, rooms, etc.
 		Component[] comps = new Component[] {new Component(0, 3, ComponentType.Relay, 0, 0), new Component(1, 3, ComponentType.Explorer, 20, 50), new Component(2, 3, ComponentType.Relay, 50, 50), new Component(3, 3, ComponentType.Explorer, 80, 50), new Component(4, 3, ComponentType.Explorer, 0, 100), new Component(5, 3, ComponentType.Relay, 80, 100)};
-		Room[] rooms = new Room[] {new Room(10, 20, 0), new Room(40, 80, 0), new Room(15, 0, 50), new Room(10, 50, 0)};
+		Room[] rooms = new Room[] {new Room(10, 20, 0), new Room(40, 80, 0), new Room(15, 0, 50)};
 		
 		// CSP representation
 		RoomEnsembleModel[] roomEnsembles = new RoomEnsembleModel[rooms.length];
@@ -147,9 +147,9 @@ public class Program {
 					IntConstraintFactory.arithm(fitness, "=", 0)
 					);
 			
-			IntVar density = VariableFactory.integer("room_" + i + "_density", 0, 1000, solver);
-			IntVar densityDeviation = VariableFactory.integer("room_" + i + "_density_dev", 0, 1000, solver);
-			IntVar densityDevSqr = VariableFactory.integer("room_" + i + "_density_dev_sqr", 0, 1000000, solver);
+			IntVar density = VariableFactory.integer("room_" + i + "_density_TMP", 0, 1000, solver);
+			IntVar densityDeviation = VariableFactory.integer("room_" + i + "_density_dev_TMP", 0, 1000, solver);
+			IntVar densityDevSqr = VariableFactory.integer("room_" + i + "_density_dev_sqr_TMP", 0, 1000000, solver);
 			roomEnsembles[i].squareDensityDeviation = densityDevSqr;
 			LogicalConstraintFactory.ifThenElse(LogicalConstraintFactory.and(exists), 
 					LogicalConstraintFactory.and(
@@ -194,8 +194,10 @@ public class Program {
 		
 		IntVar roomFitness = VariableFactory.integer("rooms_fitness", -1000, 0, solver);
 		IntVar weightedRoomFitness = VariableFactory.integer("weighted_rooms_fitness", -10000, 0, solver);
+		IntVar weightedRoomFitnessAvg = VariableFactory.integer("weighted_rooms_fitness_avg", -10000, 0, solver);
 		solver.post(IntConstraintFactory.sum(roomFitnessVars, roomFitness));
 		solver.post(IntConstraintFactory.times(roomFitness, 1, weightedRoomFitness));
+		solver.post(IntConstraintFactory.eucl_div(weightedRoomFitness, ensembleCount, weightedRoomFitnessAvg));
 		
 		IntVar[] densityDeviationSqrs = new IntVar[rooms.length];
 		for(int i = 0; i < rooms.length; ++i) {
@@ -204,11 +206,13 @@ public class Program {
 		
 		IntVar densityDeviationSum = VariableFactory.integer("density_deviation_sum", 0, 1000000, solver);
 		IntVar weightedDensityDeviationSum = VariableFactory.integer("weighted_density_deviation", -10000, 0, solver);
+		IntVar weightedDensityDeviationAvg = VariableFactory.integer("weighted_density_deviation_avg", -10000, 0, solver);
 		solver.post(IntConstraintFactory.sum(densityDeviationSqrs, densityDeviationSum));
 		solver.post(IntConstraintFactory.eucl_div(densityDeviationSum, VariableFactory.fixed(-100, solver), weightedDensityDeviationSum));
+		solver.post(IntConstraintFactory.eucl_div(weightedDensityDeviationSum, ensembleCount, weightedDensityDeviationAvg));
 		
 		IntVar fitness = VariableFactory.integer("fitness", -10000, 0, solver);
-		solver.post(IntConstraintFactory.sum(new IntVar[] {weightedDensityDeviationSum, weightedRoomFitness}, fitness));
+		solver.post(IntConstraintFactory.sum(new IntVar[] {/*weightedDensityDeviationAvg,*/ weightedRoomFitnessAvg}, fitness));
 		
 		long startTime = System.currentTimeMillis();
 		
